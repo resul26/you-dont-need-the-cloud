@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cheat Sheets — You Don't Need The Cloud</title>
+<meta name="description" content="Appendix A — Cheat Sheets">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Appendix A</div>
+<h1 class="chapter-title rv rv-d1">Cheat Sheets</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<h2 class="rv">VRAM per 1B params, by quant format</h2>
+<div class="rv" style="overflow-x:auto"><table><thead><tr><th>Format</th><th>GB per 1B</th></tr></thead><tbody><tr><td>FP16 / BF16</td><td>~2 GB</td></tr><tr><td>FP8 / INT8</td><td>~1 GB</td></tr><tr><td>Q6_K (GGUF)</td><td>~0.82 GB</td></tr><tr><td>Q5_K (GGUF)</td><td>~0.69 GB</td></tr><tr><td>Q4_K (GGUF)</td><td>~0.56 GB</td></tr><tr><td>Q3_K (GGUF)</td><td>~0.43 GB</td></tr><tr><td>Q2_K (GGUF)</td><td>~0.33 GB</td></tr><tr><td>4-bit generic</td><td>~0.5 GB</td></tr></tbody></table></div>
+<h2 class="rv">What model fits on which GPU (4-bit)</h2>
+<div class="rv" style="overflow-x:auto"><table><thead><tr><th>VRAM</th><th>FP16</th><th>FP8</th><th>4-bit</th></tr></thead><tbody><tr><td>8 GB</td><td>~3B</td><td>~6–7B</td><td>~12–13B</td></tr><tr><td>12 GB</td><td>~5B</td><td>~10B</td><td>~18–20B</td></tr><tr><td>16 GB</td><td>~7B</td><td>~13B</td><td>~25B</td></tr><tr><td>24 GB</td><td>~10–12B</td><td>~20B</td><td>~35–40B</td></tr><tr><td>48 GB</td><td>~20–24B</td><td>~40B</td><td>~70–80B</td></tr><tr><td>80 GB</td><td>~35–40B</td><td>~70B</td><td>~140B-class</td></tr></tbody></table></div>
+<h2 class="rv">Bandwidth tiers (2026)</h2>
+<div class="rv" style="overflow-x:auto"><table><thead><tr><th>Tier</th><th>Bandwidth</th><th>Examples</th></tr></thead><tbody><tr><td>Tier 0: Thin-and-light</td><td>&lt;150 GB/s</td><td>MacBook Air M5 (153), Snapdragon X Elite (135), Intel Lunar Lake (136)</td></tr><tr><td>Tier 1: Entry unified</td><td>250–300 GB/s</td><td>DGX Spark (273), Mac mini M4 Pro (273), Strix Halo (256)</td></tr><tr><td>Tier 2: Real workstation</td><td>450–650 GB/s</td><td>Mac Studio M4 Max (546), MacBook Pro M5 Max (460–614), Radeon PRO R9700 (640), Tenstorrent Blackhole (512)</td></tr><tr><td>Tier 3: Top unified</td><td>~800 GB/s</td><td>Mac Studio M3 Ultra (819)</td></tr><tr><td>Tier 4: High-end discrete</td><td>~1.8 TB/s</td><td>RTX PRO 6000 Blackwell, RTX 5090 (both 1792 GB/s)</td></tr></tbody></table></div>
+<h2 class="rv">Inference engine cheat sheet</h2>
+<div class="rv" style="overflow-x:auto"><table><thead><tr><th>Situation</th><th>Engine</th></tr></thead><tbody><tr><td>Laptop / edge / odd hardware</td><td>llama.cpp</td></tr><tr><td>Mac-first</td><td>MLX / MLX-LM</td></tr><tr><td>Single RTX card local</td><td>ExLlamaV2</td></tr><tr><td>2–4+ NVIDIA GPUs</td><td>ExLlamaV3</td></tr><tr><td>General prod serving</td><td>vLLM</td></tr><tr><td>Long-context / MoE / routing</td><td>SGLang</td></tr><tr><td>NVIDIA max perf</td><td>TensorRT-LLM</td></tr><tr><td>Cluster orchestration</td><td>NVIDIA Dynamo</td></tr></tbody></table></div>
+<h2 class="rv">Real-world model-size examples</h2>
+<div class="rv" style="overflow-x:auto"><table><thead><tr><th>Model</th><th>FP16</th><th>FP8</th><th>4-bit</th></tr></thead><tbody><tr><td>7B</td><td>~14 GB</td><td>~7 GB</td><td>~3.5–4 GB</td></tr><tr><td>13B</td><td>~26 GB</td><td>~13 GB</td><td>~6–7 GB</td></tr><tr><td>70B</td><td>~140 GB</td><td>~70 GB</td><td>~35–40 GB</td></tr><tr><td>405B</td><td>~810 GB</td><td>~405 GB</td><td>~200+ GB</td></tr></tbody></table></div>
+<h2 class="rv">KV cache rules of thumb</h2>
+<ul class="rv"><li>Old Llama-style 7B MHA in FP16 → <strong>~0.5 MiB per token</strong></li><li>4K context → ~2 GiB KV</li><li>32K context → ~16 GiB KV</li><li>FP8/INT8 KV cache = practical 2026 floor</li><li>Sub-8-bit KV cache = research territory, benchmark hard</li></ul>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="epilogue.html"><span class="dir">&#8592; Previous — Epilogue</span><span class="t">The Default Is Now Local</span></a>
+<a class="pn next" href="appb.html"><span class="dir">Next — Appendix B &#8594;</span><span class="t">Decision Trees for the Impatient</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

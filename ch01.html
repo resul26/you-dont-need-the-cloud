@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What the Hell Is These Things Actually Doing? — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 1 — What the Hell Is These Things Actually Doing?">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 1</div>
+<h1 class="chapter-title rv rv-d1">What the Hell Is These Things Actually Doing?</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Okay. Sit down. I'm going to explain a large language model in one paragraph and you're going to understand it, and then you're going to be annoyed that nobody explained it this way before.</p>
+<p class="rv">An LLM does <strong>one</strong> thing. Over and over. It takes the text it has so far, and it guesses the next token. That's the whole thing. It doesn't "write an essay." It doesn't "know your codebase." It guesses the next token, appends that guess to what it has, and guesses again. A million-dollar machine doing the world's most expensive autocomplete, one token at a time.</p>
+<p class="rv">Here's the loop, in order, because loops matter:</p>
+<ul class="rv"><li>Your text becomes tokens (little number-chunks — more on those in a second).</li><li>Those tokens get fed into the model.</li><li>The model computes a score for <strong>every possible next token</strong> in its vocabulary.</li><li>Some policy picks one of them — could be the top-scoring one, could be a random draw from the top few.</li><li>That chosen token gets appended to the sequence.</li><li>Repeat until the model decides it's done, you decide it's done, or you run out of gas money (token limit).</li></ul>
+<p class="rv">That's it. That's inference. The fancy math people do the same thing in code:</p>
+
+<div class="diagram" id="diag-loop" data-autoplay>
+  <div class="d-head">
+    <span class="d-title">Fig 1 — The Loop: one token at a time</span>
+    <span class="d-ctrl">
+      <button class="d-btn" data-act="play">Play</button>
+      <button class="d-btn" data-act="replay">Replay</button>
+      <input type="range" data-act="scrub" min="0" max="10" step="0.05" value="0" style="width:130px" aria-label="Scrub timeline">
+    </span>
+  </div>
+  <svg viewBox="0 0 780 430" role="img" aria-label="Inference loop diagram: prompt becomes tokens, model scores next token, decode appends, repeat">
+    <defs>
+      <path id="loop-path" d="M 190 95 L 330 95 L 560 130 L 630 300 L 470 350 L 190 350 L 120 300 L 190 95" fill="none"/>
+    </defs>
+    <!-- edges -->
+    <g id="edges">
+      <path class="edge" id="e1" d="M 190 95 L 330 95"/>
+      <path class="edge" id="e2" d="M 330 95 L 560 130"/>
+      <path class="edge" id="e3" d="M 560 160 L 622 262"/>
+      <path class="edge-acc" id="e4" d="M 600 316 L 505 342"/>
+      <path class="edge" id="e5" d="M 440 350 L 225 350"/>
+      <path class="edge" id="e6" d="M 190 350 L 133 307"/>
+      <path class="edge" id="e7" d="M 147 268 L 182 132"/>
+      <path class="edge-dash edge" id="e8" d="M 545 205 L 545 252"/>
+    </g>
+    <g id="eheads">
+      <polygon class="eh" points="0,-5 9,0 0,5" transform="translate(330,95) rotate(0)" fill="#F05A28"/>
+      <polygon class="eh" points="0,-5 9,0 0,5" transform="translate(560,130) rotate(12)" fill="#F05A28"/>
+      <polygon class="eh" points="0,-5 9,0 0,5" transform="translate(622,262) rotate(66)" fill="#F05A28"/>
+      <polygon class="eh" points="0,-5 9,0 0,5" transform="translate(505,342) rotate(197)" fill="#F05A28"/>
+      <polygon class="eh" points="0,-5 9,0 0,5" transform="translate(225,350) rotate(180)" fill="#F05A28"/>
+      <polygon class="eh" points="0,-5 9,0 0,5" transform="translate(133,307) rotate(223)" fill="#F05A28"/>
+      <polygon class="eh" points="0,-5 9,0 0,5" transform="translate(182,132) rotate(275)" fill="#F05A28"/>
+      <polygon class="eh" points="0,-5 9,0 0,5" transform="translate(545,252) rotate(90)" fill="#F05A28"/>
+    </g>
+    <!-- diag points to final state-safe defaults; timeline choreographs from hidden ↓ -->
+    <!-- edge labels -->
+    <text class="lbl-dim" x="228" y="82">1 · text → tokens</text>
+    <text class="lbl-dim" x="400" y="83">2 · feed sequence</text>
+    <text class="lbl-dim" x="678" y="215">3 · logits</text>
+    <text class="lbl-acc" x="472" y="316">6 · repeat</text>
+    <text class="lbl-dim" x="290" y="372">5 · append token</text>
+    <text class="lbl-dim" x="30" y="230">4 · policy</text>
+    <!-- nodes -->
+    <g class="node" id="n1"><rect class="nd" x="120" y="68" width="70" height="54"/><text class="lbl" x="145" y="92">PROMPT</text><text class="lbl-dim" x="133" y="108">your text</text></g>
+    <g class="node" id="n2"><rect class="nd" x="330" y="68" width="70" height="54"/><text class="lbl" x="344" y="92">TOKENS</text><text class="lbl-dim" x="342" y="108">[281, 94…]</text></g>
+    <g class="node" id="n3"><rect class="nd-acc" x="485" y="130" width="150" height="75" stroke-width="2"/><text class="lbl" x="525" y="162">MODEL</text><text class="lbl-dim" x="506" y="181">scores every next token</text></g>
+    <g class="node" id="n4"><rect class="nd" x="588" y="266" width="84" height="54"/><text class="lbl" x="602" y="290">DECODE</text><text class="lbl-dim" x="600" y="306">pick one</text></g>
+    <g class="node" id="n5"><rect class="nd" x="440" y="322" width="60" height="54"/><text class="lbl" x="448" y="346">+TOKEN</text><text class="lbl-dim" x="446" y="362">grows seq</text></g>
+    <g class="node" id="n6"><rect class="nd" x="158" y="322" width="64" height="54"/><text class="lbl" x="163" y="346">CONTEXT</text><text class="lbl-dim" x="166" y="362">so far</text></g>
+    <g class="node" id="n7"><rect class="nd" x="80" y="266" width="80" height="54"/><text class="lbl" x="94" y="290">POLICY</text><text class="lbl-dim" x="88" y="306">greedy? sample?</text></g>
+    <g class="node" id="n8"><rect class="nd" x="490" y="255" width="110" height="44" stroke-dasharray="4 4"/><text class="lbl" x="506" y="276">KV CACHE</text><text class="lbl-dim" x="497" y="291">working memory</text></g>
+    <!-- travelling pulse (hidden by default; appears during Act 4) -->
+    <circle class="pulse" id="pulse" r="6" cx="190" cy="95" opacity="0"/>
+    <text class="lbl-acc" id="loop-count" x="360" y="425" opacity="0">LOOP × 3 — that’s inference</text>
+  </svg>
+  <div class="d-foot">Autoplays when scrolled into view. Hand-authored semantic SVG + GSAP 3 timeline (DrawSVG-style edge draw, MotionPath pulse) — the animated-svg pattern.</div>
+</div>
+<script>
+registerDiagram("diag-loop", function (tl, host) {
+var q = function (s) { return host.querySelector(s); };
+var qa = function (s) { return host.querySelectorAll(s); };
+/* default-visible: the scene renders complete with no JS. The animation
+   starts by hiding pieces and choreographing them back — classic animated-svg
+   five-act structure, but safe against JS/autoplay failures. */
+qa("#edges path").forEach(function (p) {
+  var L = p.getTotalLength();
+  p.style.strokeDasharray = p.classList.contains("edge-dash") ? "5 6" : L;
+  p.style.strokeDashoffset = p.classList.contains("edge-dash") ? 0 : L;
+});
+// hide everything at t=0, then rebuild
+tl.set(qa(".node"), {opacity: 0, y: 12}, 0);
+tl.set(qa("#edges path"), {opacity: 1}, 0); // offset already set; covered by dash
+tl.set(qa(".eh"), {opacity: 0, scale: 0, transformOrigin: "50% 50%"}, 0);
+tl.set(q("#loop-count"), {opacity: 0}, 0);
+tl.set(q("#pulse"), {opacity: 0}, 0);
+tl.set(q("#n3 rect"), {fill: "rgba(240,90,40,.16)"}, 0);
+// ACT 1 — establish the model
+tl.fromTo(q("#n3"), {opacity: 0, scale: .8}, {opacity: 1, y: 0, scale: 1, duration: .5, ease: "power2.out"}, 0.15);
+// ACT 2 — build nodes around it
+["#n1", "#n2", "#n4", "#n5", "#n6", "#n7", "#n8"].forEach(function (id, i) {
+  tl.to(q(id), {opacity: 1, y: 0, duration: .35, ease: "power2.out"}, 0.55 + i * 0.16);
+});
+// ACT 3 — connect edges
+["#e1", "#e2", "#e3", "#e4", "#e5", "#e6", "#e7", "#e8"].forEach(function (id, i) {
+  tl.to(q(id), {strokeDashoffset: 0, duration: .45, ease: "power1.inOut"}, 1.9 + i * 0.3);
+});
+tl.to(qa(".eh"), {opacity: 1, scale: 1, duration: .3, stagger: .3, ease: "back.out(2.5)"}, 1.95);
+// ACT 4 — flow: pulse rides the full loop path
+tl.set(q("#pulse"), {opacity: 1}, 4.6);
+tl.set(q("#pulse"), {attr: {cx: 190, cy: 95}}, 4.6);
+tl.to(q("#pulse"), {motionPath: {path: "#loop-path", align: "#loop-path", alignOrigin: [.5, .5]},
+  duration: 5.4, ease: "none"}, 4.6);
+tl.to(q("#loop-count"), {opacity: 1, duration: .5}, 9.4);
+// ACT 5 — resolve: highlight the money node
+tl.to(q("#n3 rect"), {fill: "rgba(240,90,40,.34)", duration: .6}, 9.6);
+tl.to({}, {duration: 1.2}); // end hold
+});
+</script>
+
+
+<blockquote class="rv"><p><strong>f(weights, sequence so far) → probability distribution over the next token</strong></p></blockquote>
+<p class="rv">Three words you'll see everywhere, so learn them now while they're cheap:</p>
+<ul class="rv"><li><strong>Logits</strong> — the raw scores, before anyone softens them into probabilities. Ugly, honest numbers.</li><li><strong>Probabilities</strong> — those same scores after softmax makes them add up to 1. Friendly numbers.</li><li><strong>Decoding</strong> — the policy that turns "a distribution of possible tokens" into "one specific token."</li></ul>
+<p class="rv">Now — why does this loop shape everything you buy? Because every piece of hardware pain you will ever feel lives in step 3 or step 6:</p>
+
+<div class="widget" id="w-tokens">
+  <div class="w-head">Try it — generation is sequential. This is all the model ever does.</div>
+  <div class="w-body">
+    <div class="slider-row">
+      <label for="tk-speed">Speed</label>
+      <input type="range" id="tk-speed" min="3" max="120" value="24" step="1">
+      <span class="val" id="tk-speed-v">24 tok/s</span>
+    </div>
+    <div class="token-stream" id="tk-out"><span class="cursor"></span></div>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+      <button class="d-btn" id="tk-play">Play</button>
+      <span class="mono" id="tk-stats" style="font-size:13px"></span>
+    </div>
+    <p class="readout-sub" style="margin-top:14px">No matter how big the machine, tokens come out one at a time. Faster hardware just means they come out less slowly. Every answer you have ever seen from an LLM arrived exactly like this.</p>
+  </div>
+</div>
+<script>
+(function () {
+  var TOKENS = ["The", " cloud", " is", " just", " some", "one", " else", "'s", " com", "puter", ",", " and", " this", " para", "graph", " was", " gen", "er", "ated", " one", " to", "ken", " at", " a", " time", ".", " There", " is", " no", " other", " way", ".", " There", " never", " was", "."];
+  var out = document.getElementById("tk-out");
+  var play = document.getElementById("tk-play");
+  var speed = document.getElementById("tk-speed");
+  var speedV = document.getElementById("tk-speed-v");
+  var stats = document.getElementById("tk-stats");
+  var timer = null, i = 0, t0 = 0;
+
+  function render() {
+    out.innerHTML = "";
+    TOKENS.forEach(function (t, k) {
+      var s = document.createElement("span");
+      s.className = "tk" + (k < i ? " done" : (k === i ? " hot" : ""));
+      s.textContent = t;
+      out.appendChild(s);
+    });
+    var c = document.createElement("span");
+    c.className = "cursor";
+    out.appendChild(c);
+    if (i > 0) {
+      var el = (Date.now() - t0) / 1000;
+      stats.textContent = i + " tokens · " + (i / Math.max(el, .01)).toFixed(1) + " tok/s actual";
+    } else stats.textContent = "";
+  }
+  function tick() {
+    i++;
+    if (i >= TOKENS.length) { stop(); i = TOKENS.length; render(); return; }
+    render();
+  }
+  function start() { t0 = Date.now(); i = 0; render(); timer = setInterval(tick, 1000 / parseInt(speed.value, 10)); play.textContent = "Stop"; }
+  function stop() { clearInterval(timer); timer = null; play.textContent = "Play"; }
+  play.addEventListener("click", function () { timer ? stop() : start(); });
+  speed.addEventListener("input", function () {
+    speedV.textContent = speed.value + " tok/s";
+    if (timer) { clearInterval(timer); timer = setInterval(tick, 1000 / parseInt(speed.value, 10)); }
+  });
+  render();
+})();
+</script>
+
+
+<ul class="rv"><li><strong>Step 3 (computing scores for all previous tokens at the start) is called prefill.</strong> It's parallel. It's beefy. It's why a 20,000-token document takes twenty seconds before you see anything.</li><li><strong>Step 6 (generating the answer one token at a time, repeatedly) is called decode.</strong> It's sequential. It's memory-bound. It's why your 24GB card is "fast" but your friend with the 128GB Mac says his is "useable for bigger stuff."</li></ul>
+<p class="rv">That's the entire book, basically. Prefill is compute-hungry. Decode is bandwidth-hungry. The KV cache (we'll get there, brace yourself) grows with every token. Everything else is a footnote.</p>
+<blockquote class="rv"><p><strong>Perception note:</strong> Long prefill = long pause before nothing happens. Slow decode = words appearing like it's 1997 dial-up. Both feel like the model is "slow," but they have totally different causes, and totally different fixes. People who don't separate them will waste months tuning the wrong thing. Don't be those people.</p></blockquote>
+<p class="rv">So. Next question: what the hell is a "token," and why does it determine whether your 128K "context window" is a feature or a lie?</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="intro.html"><span class="dir">&#8592; Previous — Introduction</span><span class="t">You're Renting a Fortune, One Token at a Time</span></a>
+<a class="pn next" href="ch02.html"><span class="dir">Next — Chapter 2 &#8594;</span><span class="t">Bits, Bytes, and Bullshit (Tokens, Transformers &amp; Attention)</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

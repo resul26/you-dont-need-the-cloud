@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bits, Bytes, and Bullshit (Tokens, Transformers &amp; Attention) — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 2 — Bits, Bytes, and Bullshit (Tokens, Transformers &amp; Attention)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 2</div>
+<h1 class="chapter-title rv rv-d1">Bits, Bytes, and Bullshit (Tokens, Transformers &amp; Attention)</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv"><strong>Tokens first.</strong> The model doesn't see words. It sees tokens — chunks of text that got assigned integer IDs by a tokenizer. "Hello" might be one token. "Internationalization" might be three: <code>inter</code>, <code>national</code>, <code>ization</code>. Punctuation is its own token. Spaces are baked into whatever they attach to. There's a whole subsystem. It's fine. You don't need to build one.</p>
+<p class="rv">Why you care:</p>
+<ul class="rv"><li><strong>Context limits are in tokens, not words.</strong> A "128K context model" doesn't mean 128,000 words. It's usually more like 70–90K words, depending on language and tokenizer.</li><li><strong>Tokenizers are not interchangeable.</strong> Different models use different ones. The same 4,000-word document might be 5,000 tokens in one tokenizer and 7,500 in another. Never compare "tokens per second" across model families without checking. That's a Reddit-grade mistake.</li><li><strong>Special tokens matter.</strong> <code>&lt;|user|&gt;</code>, <code>&lt;|assistant|&gt;</code>, BOS, EOS — these control markers decide whether the model knows it's in a chat, whose turn it is, and when to shut up. Get them wrong and the model acts like it hit its head.</li></ul>
+<p class="rv"><strong>The Transformer.</strong> Everything else is scaffolding. The model itself is this:</p>
+<ul class="rv"><li><strong>Token embeddings</strong> — integer IDs become big vectors.</li><li><strong>Positional info</strong> — usually RoPE, which rotates vectors so order survives.</li><li><strong>Attention</strong> — each token looks back at all earlier tokens and decides who matters.</li><li><strong>MLP block</strong> — a dense nonlinear transformation. A <em>huge</em> chunk of your parameters live here.</li><li><strong>LayerNorm + residuals</strong> — keep the whole thing from exploding across 80+ layers.</li><li><strong>Output projection</strong> — the final hidden state becomes logits over the vocabulary.</li></ul>
+<p class="rv">Stack that 30, 60, 120 times. Congratulations, you have a language model.</p>
+<p class="rv"><strong>Attention is the memory-hungry part</strong>, so here's the thing nobody tells you: there are flavors of attention, and they change how big your KV cache gets (we're coming to the KV cache, hold on):</p>
+<ul class="rv"><li><strong>MHA (multi-head attention)</strong> — the classic. Every head gets its own key/value state. Powerful, expensive.</li><li><strong>MQA (multi-query attention)</strong> — all query heads share <em>one</em> key/value head. KV cache gets tiny, quality takes a small hit.</li><li><strong>GQA (grouped-query attention)</strong> — the middle ground everyone actually uses now. Groups of query heads share KV heads.</li></ul>
+<p class="rv">Why you care: <strong>two 7B models can have completely different VRAM behavior at long context.</strong> A 7B MHA model at 128K context can blow past a 24GB card. A 7B GQA model at the same length fits with room to nap in. Same parameter count. Different attention. Wildly different bills.</p>
+<p class="rv">So when you're comparing two models and one crashes at 64K context and the other doesn't, don't be the guy in the comments going "bro they're both 7B, your card must be broken." Read the architecture. This is why they print it on the model card. It's not decoration.</p>
+<p class="rv"><strong>On kernels:</strong> FlashAttention and SDPA-style implementations cut the actual memory traffic of attention. A runtime with good attention kernels can be dramatically faster than one without, on the same model and hardware. Engine choice matters even before we get to engines. Hold that thought for Chapter 12.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch01.html"><span class="dir">&#8592; Previous — Chapter 1</span><span class="t">What the Hell Is These Things Actually Doing?</span></a>
+<a class="pn next" href="ch03.html"><span class="dir">Next — Chapter 3 &#8594;</span><span class="t">The Elephant in the Room (The KV Cache)</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>You Don't Need The Cloud — interactive edition — You Don't Need The Cloud</title>
+<meta name="description" content="An interactive retelling of Ahmad Osman's Local LLMs From Zero to Hero series.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html" class="on">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="kicker rv">An interactive book · 2026</div>
+    <h1 class="rv rv-d1">You don't need<br>the <span class="o">cloud</span>.</h1>
+    <p class="lede rv rv-d2">Running serious AI on your own hardware stopped being science fiction and became a math problem.
+    This interactive edition retells Ahmad Osman's <em>Local LLMs From Zero to Hero</em> series — with every table, every formula,
+    and a pile of live diagrams and simulators you can touch.</p>
+    <div class="cta-row rv rv-d3">
+      <a class="btn solid" href="intro.html">Start reading &#8594;</a>
+      <a class="btn" href="#contents">Browse contents</a>
+      <a class="btn" href="https://x.com/TheAhmadOsman/status/2058617968628551718" target="_blank" rel="noopener">Source series &#8599;</a>
+    </div>
+    <div class="hero-stats rv rv-d3">
+      <div class="stat"><div class="n">24</div><div class="l">Chapters</div></div>
+      <div class="stat"><div class="n">9</div><div class="l">Interactive widgets</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">Source articles</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">Formula you must memorize</div></div>
+    </div>
+  </section>
+  <section id="contents">
+    <div class="kicker rv">Contents</div>
+    <h2 class="rv" style="font-family:var(--font-display); font-size:34px; margin:0 0 8px; font-weight:600">The whole book</h2>
+    <p class="rv" style="color:var(--ink-mute); font-size:15px; margin:0 0 10px">Read front-to-back or click the row that's hurting you today.</p>
+    <div class="toc-grid">
+      <a class="toc-row rv" href="intro.html">
+        <span class="num">00</span>
+        <span><span class="t">You&#x27;re Renting a Fortune, One Token at a Time</span><span class="d">The thesis: renting AI forever is a 2023 take. Here&#x27;s why.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch01.html">
+        <span class="num">01</span>
+        <span><span class="t">What the Hell Is These Things Actually Doing?</span><span class="d">The loop: tokens in, probabilities out, one token at a time.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch02.html">
+        <span class="num">02</span>
+        <span><span class="t">Bits, Bytes, and Bullshit (Tokens, Transformers &amp; Attention)</span><span class="d">What tokens actually are, why attention flavors change your memory bill.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch03.html">
+        <span class="num">03</span>
+        <span><span class="t">The Elephant in the Room (The KV Cache)</span><span class="d">The cache that eats 16 GB before breakfast. Simulator included.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch04.html">
+        <span class="num">04</span>
+        <span><span class="t">Why Your 24 Gig Card Cries at 32K Context</span><span class="d">Two phases, two bottlenecks. Run the race and feel the difference.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch05.html">
+        <span class="num">05</span>
+        <span><span class="t">VRAM Math — The Only Formula You&#x27;ll Ever Need</span><span class="d">params × bits ÷ 8. That&#x27;s it. That&#x27;s the whole chapter.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch06.html">
+        <span class="num">06</span>
+        <span><span class="t">The VRAM Tax Nobody Mentions Until It&#x27;s Too Late</span><span class="d">Weights are only part of the bill. Calculator: do your own math.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch07.html">
+        <span class="num">07</span>
+        <span><span class="t">MoE, GGUF, and Other Things That Aren&#x27;t Magic</span><span class="d">8x7B is not 56B, and GGUF is a llama.cpp story, not magic.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch08.html">
+        <span class="num">08</span>
+        <span><span class="t">Capacity vs. Bandwidth — Two Different Animals</span><span class="d">Fit vs speed. The scatter plot that settles every comment thread.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch09.html">
+        <span class="num">09</span>
+        <span><span class="t">The 2026 Hardware Zoo (Real Boxes, Real Numbers)</span><span class="d">Every real box, every real bandwidth number, filterable.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch10.html">
+        <span class="num">10</span>
+        <span><span class="t">The AI PC Trap</span><span class="d">Or: how marketing teams sleep at night.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch11.html">
+        <span class="num">11</span>
+        <span><span class="t">Inference Engines — You&#x27;re Not Picking an Engine, Dummy</span><span class="d">Three questions, and the engine picks itself. Click through it.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch12.html">
+        <span class="num">12</span>
+        <span><span class="t">The Engine Lineup, One by One</span><span class="d">llama.cpp to TensorRT-LLM — who owns which lane.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch13.html">
+        <span class="num">13</span>
+        <span><span class="t">Prefill, Decode, and Why Your Demo Lied to You</span><span class="d">Why single-prompt demos are lies and what to benchmark instead.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch14.html">
+        <span class="num">14</span>
+        <span><span class="t">Benchmarks — Stop Reading Charts You Don&#x27;t Understand</span><span class="d">The golden rule: never compare engines on single-user tok/s.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch15.html">
+        <span class="num">15</span>
+        <span><span class="t">&quot;It Runs&quot; vs. &quot;It Serves&quot;</span><span class="d">Demo vs system. The distance between them, itemized.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch16.html">
+        <span class="num">16</span>
+        <span><span class="t">The 2026 Model Scene — an Ecosystem, Not a Horse Race</span><span class="d">Qwen, Gemma, Kimi, GLM, DeepSeek — ecosystems, not a horse race.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch17.html">
+        <span class="num">17</span>
+        <span><span class="t">Quantization — Quality Loss You Can Choose on Purpose</span><span class="d">Every quant trades memory for quality. Watch the trade.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch18.html">
+        <span class="num">18</span>
+        <span><span class="t">Chat Templates (Or: Why Your Model Sounds Drunk)</span><span class="d">The #1 silent eval bug, and how to not be its victim.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch19.html">
+        <span class="num">19</span>
+        <span><span class="t">RAG vs. Giant Prompts</span><span class="d">Step through the 11-stage pipeline step by step.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch20.html">
+        <span class="num">20</span>
+        <span><span class="t">Agents with Guardrails</span><span class="d">Before your chatbot deletes something. Four layers of guardrails.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch21.html">
+        <span class="num">21</span>
+        <span><span class="t">Privacy Is Not Free</span><span class="d">Local improves privacy. It does not grant armor.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch22.html">
+        <span class="num">22</span>
+        <span><span class="t">Failure Modes and Fixes</span><span class="d">The boring checks that fix more than model-swapping.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="ch23.html">
+        <span class="num">23</span>
+        <span><span class="t">How to Grow Your Stack</span><span class="d">Beginner to expert without going broke or insane.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="epilogue.html">
+        <span class="num">24</span>
+        <span><span class="t">The Default Is Now Local</span><span class="d">Cloud is a choice now, not the only choice.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="appa.html">
+        <span class="num">25</span>
+        <span><span class="t">Cheat Sheets</span><span class="d">Every table in the book, in one place.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="appb.html">
+        <span class="num">26</span>
+        <span><span class="t">Decision Trees for the Impatient</span><span class="d">For the impatient. Decide in three questions.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="appc.html">
+        <span class="num">27</span>
+        <span><span class="t">Glossary</span><span class="d">Stuff that sounds made up but isn&#x27;t.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+      <a class="toc-row rv" href="sources.html">
+        <span class="num">28</span>
+        <span><span class="t">About the Source Articles</span><span class="d">The four articles this book retells, properly credited.</span></span>
+        <span class="arrow">&#8594;</span>
+      </a>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

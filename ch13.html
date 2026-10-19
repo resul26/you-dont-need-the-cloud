@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prefill, Decode, and Why Your Demo Lied to You — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 13 — Prefill, Decode, and Why Your Demo Lied to You">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 13</div>
+<h1 class="chapter-title rv rv-d1">Prefill, Decode, and Why Your Demo Lied to You</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Back to this one more time, slowly, because if you get this wrong you'll benchmark wrong, tune wrong, and blame wrong.</p>
+<p class="rv"><strong>Prefill</strong> processes your prompt. Builds the initial KV cache. <strong>Compute-bound.</strong> If your prompt is 20,000 tokens long, you pay 20,000 tokens of forward passes before a single answer token appears. It's why the experience of "paste a giant document and wait 25 seconds before anything happens" happens.</p>
+<p class="rv"><strong>Decode</strong> generates the answer, one token at a time. <strong>Bandwidth-bound.</strong> Each token re-reads the whole model's weights plus the growing KV cache. Sequential. This is the "stream of words" feeling.</p>
+<p class="rv">So what do you optimize?</p>
+<ul class="rv"><li>Long prompt, short answer → prefill dominates → attention kernels, chunked prefill, fast prompt ingestion are the fix.</li><li>Short prompt, long answer → decode dominates → bandwidth, quantization, exact memory residency are the fix.</li><li>Lots of users → scheduler quality, continuous batching, prefix caching, pagination are the fix.</li><li>Long context → KV cache handling is the fix.</li><li>Agentic workloads (lots of small calls, many turns) → latency per loop dominates → speculative decoding, prefix caching, tight runtimes, KV reuse.</li></ul>
+<p class="rv">Your "I can demo it" moment is prefill + one decode. Your "I am a system" moment is sustained decode + concurrent prefill + growing KV + scheduler fairness under load. Benchmark accordingly.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch12.html"><span class="dir">&#8592; Previous — Chapter 12</span><span class="t">The Engine Lineup, One by One</span></a>
+<a class="pn next" href="ch14.html"><span class="dir">Next — Chapter 14 &#8594;</span><span class="t">Benchmarks — Stop Reading Charts You Don't Understand</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

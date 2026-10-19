@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inference Engines — You're Not Picking an Engine, Dummy — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 11 — Inference Engines — You're Not Picking an Engine, Dummy">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 11</div>
+<h1 class="chapter-title rv rv-d1">Inference Engines — You're Not Picking an Engine, Dummy</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">The big idea here, and I want it to land: <strong>you don't pick an engine first.</strong></p>
+<p class="rv">You pick a hardware strategy, a workload shape, and a serving model. The engine follows.</p>
+<p class="rv">Pick hardware first. Figure out whether you have a 3090 desktop, a 2×4090 workstation, a Mac Studio, a DGX Spark, a laptop, a cluster. Then figure out whether you're a hobbyist, an agent-builder, an internal-tools person, or a public-facing serving operation. <em>Then</em> pick the engine.</p>
+<p class="rv">What does an inference engine actually do? A lot more than people assume:</p>
+<ul class="rv"><li>Loads weights</li><li>Runs the tokenizer</li><li>Runs the forward pass</li><li>Samples tokens per your decoding policy</li><li>Maintains the KV cache</li><li>Streams results</li><li>Handles batching, scheduling, prefix caching, paged attention</li><li>Applies quantization strategies</li><li>Manages tensor/pipeline/data/expert parallel execution</li><li>Exposes API surfaces (OpenAI-compatible, Anthropic Messages, gRPC, etc.)</li><li>Runs observability — metrics, tracing, logs</li></ul>
+<p class="rv">Ahmad's mental model: <strong>the engine is the traffic cop, memory manager, kernel dispatcher, scheduler, cache accountant, parallelism planner, and API surface — all at once.</strong> Sometimes it's also the deployment framework.</p>
+<p class="rv">The best engine is the one that matches your memory hierarchy, your interconnect, your quantization format, your latency vs throughput targets, your architecture, and your operational maturity. Full stop.</p>
+
+<div class="widget" id="w-engine">
+  <div class="w-head">Don’t pick an engine — answer three questions and the engine picks itself</div>
+  <div class="w-body">
+    <div id="eng-crumbs" style="margin-bottom:18px; font:500 13px var(--font-mono); color:var(--ink-mute)"></div>
+    <div id="eng-q"></div>
+    <div id="eng-result" style="display:none; margin-top:22px"></div>
+  </div>
+</div>
+<script>
+(function () {
+  var QUESTIONS = [
+    {
+      q: "Q1 — What hardware are you actually holding?",
+      opts: [
+        ["Weird / laptop / CPU-heavy / edge", "portable"],
+        ["A Mac", "mac"],
+        ["One NVIDIA consumer GPU (3090/4090/5090)", "onegpu"],
+        ["2–4+ NVIDIA GPUs", "multigpu"],
+        ["NVIDIA datacenter", "dc"]
+      ]
+    },
+    {
+      q: "Q2 — Who’s using it?",
+      opts: [
+        ["Just me, messing around", "hobby"],
+        ["Me + my agents / scripts", "agent"],
+        ["An internal team", "team"],
+        ["Real customers, real traffic", "prod"]
+      ]
+    },
+    {
+      q: "Q3 — What matters most?",
+      opts: [
+        ["Convenience & portability", "easy"],
+        ["Raw speed on my box", "speed"],
+        ["Throughput, concurrency, structured outputs", "scale"],
+        ["Long context / MoE / fancy routing", "fancy"]
+      ]
+    }
+  ];
+  var answers = [];
+  var qHost = document.getElementById("eng-q"), crumbs = document.getElementById("eng-crumbs"), res = document.getElementById("eng-result");
+  function decide(a) {
+    var hw = a[0], who = a[1], what = a[2];
+    if (hw === "portable") return ["llama.cpp", "You picked weird hardware. llama.cpp is the portability king — GGUF, CPU+GPU hybrid offload, runs anywhere. Just don’t serve a fleet with it."];
+    if (hw === "mac") return who === "prod" ? ["vLLM", "Macs are for building; production serving wants a real serving stack. MLX for native dev, llama.cpp for GGUF — and when you outgrow the Mac, vLLM on real iron."] : ["MLX / MLX-LM", "Mac-first workflows → MLX. Unified memory is a capacity superpower. If you want broader GGUF compatibility, llama.cpp is your second answer."];
+    if (hw === "onegpu" && who !== "prod") return ["ExLlamaV2", "One consumer card + local inference → ExLlamaV2 makes your 3090/4090/5090 scream with EXL2 quants. llama.cpp if you value convenience over peak."];
+    if (hw === "multigpu") return who === "prod" ? ["vLLM or ExLlamaV3", "2–4+ GPUs: ExLlamaV3 for local tensor/expert-parallel, vLLM the moment other people use it. Do NOT run llama.cpp or Ollama across multi-GPU. That’s the whole warning."] : ["ExLlamaV3", "2–4+ consumer GPUs → ExLlamaV3: tensor and expert parallelism tuned for consumer cards, TabbyAPI for an OpenAI-compatible endpoint."];
+    if (hw === "dc" && what === "speed") return ["TensorRT-LLM", "NVIDIA datacenter + maximum performance → TensorRT-LLM. You trade portability for FP8-class throughput. Benchmark vLLM and SGLang against it before committing."];
+    if (who === "prod" || who === "team") return what === "fancy" ? ["SGLang", "Structured outputs, long context, MoE routing → SGLang. vLLM’s systems-brained cousin. Benchmark both."] : ["vLLM", "Real serving → start with vLLM. PagedAttention, continuous batching, chunked prefill, prefix caching, every quant you’ll actually meet. It’s the default for a reason."];
+    return ["vLLM (eventually)", "Hobby today, but every road you described leads to a serving stack. Learn llama.cpp now, move to vLLM when others show up."];
+  }
+  function renderStep() {
+    res.style.display = "none";
+    crumbs.textContent = answers.map(function (a) { return a.label; }).join("  →  ");
+    if (answers.length >= QUESTIONS.length) {
+      var out = decide(answers.map(function (a) { return a.key; }));
+      qHost.innerHTML = "";
+      var card = document.createElement("div");
+      card.style.cssText = "padding:26px; border:1px solid var(--accent); background:var(--accent-soft)";
+      card.innerHTML = '<div style="font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); font-weight:600; margin-bottom:10px">The engine picks itself</div>' +
+        '<div class="big-readout"><span class="o">' + out[0] + '</span></div>' +
+        '<p style="margin:10px 0 0; color:var(--ink-dim)">' + out[1] + '</p>';
+      res.appendChild(card);
+      res.style.display = "block";
+      var again = document.createElement("button");
+      again.className = "d-btn"; again.textContent = "Start over"; again.style.marginTop = "18px";
+      again.addEventListener("click", function () { answers = []; res.innerHTML = ""; renderStep(); });
+      qHost.appendChild(again);
+      return;
+    }
+    var step = QUESTIONS[answers.length];
+    qHost.innerHTML = '<div style="font-family:var(--font-display); font-size:19px; font-weight:500; margin-bottom:16px">' + step.q + '</div>';
+    var wrap = document.createElement("div");
+    wrap.style.cssText = "display:grid; gap:8px";
+    step.opts.forEach(function (o) {
+      var b = document.createElement("button");
+      b.className = "d-btn"; b.style.cssText = "text-align:left; padding:13px 18px; font-size:13.5px; letter-spacing:.02em; text-transform:none";
+      b.textContent = o[0];
+      b.addEventListener("click", function () { answers.push({ key: o[1], label: o[0] }); renderStep(); });
+      wrap.appendChild(b);
+    });
+    qHost.appendChild(wrap);
+  }
+  renderStep();
+})();
+</script>
+
+
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch10.html"><span class="dir">&#8592; Previous — Chapter 10</span><span class="t">The AI PC Trap</span></a>
+<a class="pn next" href="ch12.html"><span class="dir">Next — Chapter 12 &#8594;</span><span class="t">The Engine Lineup, One by One</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

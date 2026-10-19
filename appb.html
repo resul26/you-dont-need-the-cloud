@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision Trees for the Impatient — You Don't Need The Cloud</title>
+<meta name="description" content="Appendix B — Decision Trees for the Impatient">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Appendix B</div>
+<h1 class="chapter-title rv rv-d1">Decision Trees for the Impatient</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<h2 class="rv">"Should I buy a GPU or just use the cloud?"</h2>
+<ul class="rv"><li>Do you have real privacy/sovereignty requirements? <strong>Yes → buy hardware eventually.</strong> No → keep reading.</li><li>Is your workload bursty and hard to schedule, and top quality is non-negotiable? <strong>Yes → keep the API.</strong> No → keep reading.</li><li>Do you run long agent workflows, batch work, or anything with predictable high token volume? <strong>Yes → local is almost certainly cheaper over 12+ months.</strong> No → keep reading, you might be fine either way.</li><li>Do you already own decent hardware (a Mac Mini with 32GB+, a desktop with a 3090+)? <strong>Yes → set up the local stack first, evaluate, then decide.</strong> No → rent a small weekly demo from RunPod or similar before buying.</li></ul>
+<h2 class="rv">"Which hardware should I get?"</h2>
+<ul class="rv"><li>Budget &lt; $500 → small laptop-class local models only. Wait.</li><li>$1,000–$2,000 → refurbished 3090 (24GB) desktop, or a decent M-series Mac mini. Start here.</li><li>$3,000–$6,000 → new 4090/5090 desktop, or Mac Studio M4 Max. This is the real enthusiast tier.</li><li>$10,000–$25,000 → dual 5090 / dual RTX PRO workstation, Mac Studio M3 Ultra (512 GB). Production-quality local.</li><li>$25,000+ → serious talk about a multi-GPU server or DGX Spark cluster. Read Chapter 12 again, then Chapter 15.</li></ul>
+<h2 class="rv">"Which engine do I install first?"</h2>
+<ul class="rv"><li>Are you on a Mac? → MLX if you want maximum "Apple-native," llama.cpp if you want max compatibility.</li><li>Are you on a single NVIDIA consumer GPU? → llama.cpp if you want easy / portable. ExLlamaV2 if you want max per-card performance on that card.</li><li>Do you have 2–4 NVIDIA GPUs? → ExLlamaV3, or vLLM. Do not use llama.cpp here.</li><li>Are you serving more than 5 concurrent people? → vLLM. Period. Really.</li><li>Are you serving thousands of concurrent people or need structured output at scale? → Benchmark vLLM, SGLang, and TensorRT-LLM against each other.</li></ul>
+<h2 class="rv">"Which quantization should I use?"</h2>
+<ul class="rv"><li>Have memory to spare and need max quality? → FP16.</li><li>Want great quality with savings? → Q6_K or FP8.</li><li>Want the modern default? → Q4_K_M (GGUF) or EXL3 4bpw (ExLlama). This is the "just do this" answer.</li><li>Really need to squeeze? → Q3 with caution, test your tasks carefully.</li></ul>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="appa.html"><span class="dir">&#8592; Previous — Appendix A</span><span class="t">Cheat Sheets</span></a>
+<a class="pn next" href="appc.html"><span class="dir">Next — Appendix C &#8594;</span><span class="t">Glossary</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capacity vs. Bandwidth — Two Different Animals — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 8 — Capacity vs. Bandwidth — Two Different Animals">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 8</div>
+<h1 class="chapter-title rv rv-d1">Capacity vs. Bandwidth — Two Different Animals</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Okay, now we get into why hardware arguments on the internet are eternally wrong. It's because two things are being conflated.</p>
+<p class="rv"><strong>CAPACITY</strong> decides what fits.</p>
+<p class="rv"><strong>BANDWIDTH</strong> decides how fast it feels.</p>
+<blockquote class="rv"><p><strong>Local AI hardware = capacity × bandwidth × software stack</strong></p></blockquote>
+<p class="rv">Think of it like this. Capacity is how big your garage is. Bandwidth is how wide the garage door is. You can have a monstrous garage and a door the size of a mailbox slot. You'll fit plenty of cars in there. You will never get them out. Or you can have a tiny motorcycle garage with a full-width industrial door. Whatever fits, fits instantly.</p>
+
+<div class="diagram" id="diag-scatter" data-autoplay>
+  <div class="d-head">
+    <span class="d-title">Fig 2 — Fit vs Speed: every box in the book, plotted</span>
+    <span class="d-ctrl"><button class="d-btn" data-act="replay">Replay</button></span>
+  </div>
+  <svg viewBox="0 0 820 480" role="img" aria-label="Scatter plot of hardware: x is memory capacity, y is memory bandwidth">
+    <g id="axes"></g>
+    <g id="gridlabels"></g>
+    <g id="guide"></g>
+    <text class="lbl-dim" x="648" y="468">capacity (GB, log) →</text>
+    <text class="lbl-dim" x="14" y="30" transform="rotate(-90 24 30)"></text>
+    <text class="lbl-dim" x="-24" y="245" transform="rotate(-90 20 245)" text-anchor="middle">bandwidth (GB/s, log) →</text>
+    <g id="points"></g>
+  </svg>
+  <div class="d-foot">Hover a point for details. Upper-left = fast but cramped (discrete GPUs). Lower-right = roomy but chill (unified memory). The trade is the whole story of local hardware. Data: chapters 8–9 tables.</div>
+</div>
+<script>
+(function () {
+  var DATA = [
+    { n: "RTX PRO 6000 Blackwell", c: 96,  b: 1792, cls: "gpu" },
+    { n: "RTX 5090",              c: 32,  b: 1792, cls: "gpu" },
+    { n: "RTX 4090",              c: 24,  b: 1008, cls: "gpu" },
+    { n: "Radeon PRO W7900",      c: 48,  b: 864,  cls: "gpu" },
+    { n: "RX 7900 XTX",           c: 24,  b: 960,  cls: "gpu" },
+    { n: "Radeon AI PRO R9700",   c: 32,  b: 640,  cls: "gpu" },
+    { n: "Intel Arc Pro B65",     c: 32,  b: 608,  cls: "gpu" },
+    { n: "Mac Studio M3 Ultra",   c: 512, b: 819,  cls: "apple", big: true },
+    { n: "Mac Studio M4 Max",     c: 128, b: 546,  cls: "apple" },
+    { n: "MacBook Pro M5 Max",    c: 128, b: 614,  cls: "apple" },
+    { n: "Mac mini M4 Pro",       c: 64,  b: 273,  cls: "uni" },
+    { n: "DGX Spark",             c: 128, b: 273,  cls: "uni" },
+    { n: "Strix Halo / Ryzen AI", c: 128, b: 256,  cls: "uni" },
+    { n: "MacBook Air M5",        c: 32,  b: 153,  cls: "thin" },
+    { n: "Snapdragon X2 Elite",   c: 32,  b: 190,  cls: "thin" },
+    { n: "Snapdragon X Elite",    c: 32,  b: 135,  cls: "thin" },
+    { n: "Intel Lunar Lake",      c: 32,  b: 136,  cls: "thin" }
+  ];
+  var COLORS = { gpu: "#F05A28", apple: "#e8c15a", uni: "#7ea6d8", thin: "#8a929b" };
+  var W = 820, H = 480, L = 70, R = 30, T = 40, B = 60;
+  var xmin = Math.log10(16), xmax = Math.log10(560), ymin = Math.log10(100), ymax = Math.log10(2200);
+  function X(c) { return L + (Math.log10(c) - xmin) / (xmax - xmin) * (W - L - R); }
+  function Y(b) { return H - B - (Math.log10(b) - ymin) / (ymax - ymin) * (H - T - B); }
+  var svgNS = "http://www.w3.org/2000/svg";
+  var ptsHost = document.querySelector("#diag-scatter #points");
+  var ax = document.querySelector("#diag-scatter #axes");
+  var gl = document.querySelector("#diag-scatter #gridlabels");
+  var gd = document.querySelector("#diag-scatter #guide");
+  function el(tag, attrs) { var e = document.createElementNS(svgNS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  ax.appendChild(el("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: "rgba(255,255,255,.3)", "stroke-width": 1 }));
+  ax.appendChild(el("line", { x1: L, y1: H - B, x2: L, y2: T, stroke: "rgba(255,255,255,.3)", "stroke-width": 1 }));
+  var xticks = [16, 32, 64, 128, 256, 512], yticks = [128, 256, 512, 1024, 1792];
+  xticks.forEach(function (c) {
+    var x = X(c);
+    gd.appendChild(el("line", { x1: x, y1: H - B, x2: x, y2: T, stroke: "rgba(255,255,255,.06)" }));
+    var t = el("text", { x: x, y: H - B + 20, "text-anchor": "middle", "class": "lbl-dim" }); t.textContent = c; gd.appendChild(t);
+  });
+  yticks.forEach(function (b) {
+    var y = Y(b);
+    gd.appendChild(el("line", { x1: L, y1: y, x2: W - R, y2: y, stroke: "rgba(255,255,255,.06)" }));
+    var t = el("text", { x: L - 8, y: y + 4, "text-anchor": "end", "class": "lbl-dim" }); t.textContent = b >= 1000 ? (b / 1024).toFixed(1) + " TB/s" : b; gd.appendChild(t);
+  });
+  // tier lines from chapter 9
+  [[273, "unified gets interesting"], [819, "expensive & fun"]].forEach(function (p) {
+    var y = Y(p[0]);
+    gd.appendChild(el("line", { x1: L, y1: y, x2: W - R, y2: y, stroke: "#F05A28", "stroke-width": 1, "stroke-dasharray": "3 6", opacity: .55 }));
+    var t = el("text", { x: W - R - 6, y: y - 8, "text-anchor": "end", "class": "lbl-acc", opacity: .8 }); t.textContent = p[0] + " GB/s — " + p[1]; gd.appendChild(t);
+  });
+  var tt;
+  DATA.forEach(function (d, i) {
+    var pt = el("circle", {
+      cx: X(d.c), cy: Y(d.b), r: d.big ? 11 : 8,
+      fill: COLORS[d.cls], opacity: .92, "class": "scatter-pt", "data-i": i
+    });
+    pt.style.transition = "transform .12s";
+    pt.addEventListener("mouseenter", function () { pt.setAttribute("r", d.big ? 14 : 11); showTip(d); });
+    pt.addEventListener("mouseleave", function () { pt.setAttribute("r", d.big ? 11 : 8); hideTip(); });
+    ptsHost.appendChild(pt);
+    var lt = el("text", { x: X(d.c) + 12, y: Y(d.b) + 4, "class": "lbl-dim scatter-lbl", opacity: 1 });
+    lt.textContent = d.n.replace(" Blackwell", "").replace("Radeon PRO W7900", "W7900").replace("MacBook Pro M5 Max", "MBP M5 Max").replace("Mac Studio ", "").replace("/ Ryzen AI", "");
+    ptsHost.appendChild(lt);
+  });
+  function showTip(d) {
+    hideTip();
+    tt = document.createElementNS(svgNS, "g");
+    var x = X(d.c), y = Y(d.b);
+    var bx = Math.min(x + 16, W - 240), by = Math.max(y - 58, 44);
+    tt.appendChild(el("rect", { x: bx, y: by, width: 230, height: 46, fill: "#000", stroke: "#F05A28" }));
+    var t1 = el("text", { x: bx + 10, y: by + 19, fill: "#eceff2", "font-size": "12.5", "font-family": "Poppins, sans-serif" });
+    t1.textContent = d.n; tt.appendChild(t1);
+    var t2 = el("text", { x: bx + 10, y: by + 37, fill: "#F05A28", "font-size": "12", "font-family": "Poppins, sans-serif" });
+    t2.textContent = d.c + " GB · " + d.b + " GB/s"; tt.appendChild(t2);
+    document.querySelector("#diag-scatter svg").appendChild(tt);
+  }
+  function hideTip() { if (tt) { tt.remove(); tt = null; } }
+
+  registerDiagram("diag-scatter", function (tl, host) {
+    var pts = host.querySelectorAll(".scatter-pt"), lbls = host.querySelectorAll(".scatter-lbl");
+    /* default-visible: scene renders complete even if the animation never plays.
+       Timeline = choreographed entrance from nothing → full scene. */
+    tl.set(pts, { opacity: 0, attr: { r: 0 } }, 0);
+    tl.set(lbls, { opacity: 0 }, 0);
+    tl.to(pts, { opacity: .92, attr: { r: 8 }, duration: .45, stagger: .06, ease: "back.out(1.8)" }, 0.1);
+    tl.to(lbls, { opacity: 1, duration: .35, stagger: .06 }, 0.4);
+    tl.to({}, { duration: .8 });
+  });
+})();
+</script>
+
+
+<p class="rv">Here's the punchline, in big friendly letters:</p>
+<ul class="rv"><li>A 32 GB RTX 5090 and a 96 GB RTX PRO 6000 Blackwell have <strong>the same bandwidth</strong> (~1792 GB/s). They live in totally different worlds once models get big, but a 7B model will run at roughly the same <em>speed</em> on both.</li><li>A Mac Studio M3 Ultra has <strong>819 GB/s</strong> and can hold up to 512 GB of unified memory. A 180B-class dense model at 4-bit quant fits there. It doesn't fit on the 96 GB RTX PRO. But the RTX PRO will <em>decode</em> any model that <em>does</em> fit roughly twice as fast.</li><li>A DGX Spark has <strong>273 GB/s</strong> and 128 GB of unified memory. It's not a speed demon. It IS a full NVIDIA stack appliance with coherent CPU/GPU memory, which makes it a genuinely useful <em>developer</em> box.</li></ul>
+<p class="rv">What does this mean in practice? Two different questions are being asked, and people keep answering the wrong one:</p>
+<ul class="rv"><li><strong>"Can I <em>fit</em> this model?"</strong> → That's a capacity question. Look at VRAM (or unified memory).</li><li><strong>"Will it feel fast?"</strong> → That's a bandwidth question. Look at GB/s. For decode-heavy workloads, this is the number that matters.</li></ul>
+<p class="rv">Fit ≠ speed. "It runs" is a demo; "it serves" is a system design. The sooner you split these words, the fewer Reddit arguments you'll lose.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch07.html"><span class="dir">&#8592; Previous — Chapter 7</span><span class="t">MoE, GGUF, and Other Things That Aren't Magic</span></a>
+<a class="pn next" href="ch09.html"><span class="dir">Next — Chapter 9 &#8594;</span><span class="t">The 2026 Hardware Zoo (Real Boxes, Real Numbers)</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

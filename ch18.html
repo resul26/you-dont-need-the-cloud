@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chat Templates (Or: Why Your Model Sounds Drunk) — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 18 — Chat Templates (Or: Why Your Model Sounds Drunk)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 18</div>
+<h1 class="chapter-title rv rv-d1">Chat Templates (Or: Why Your Model Sounds Drunk)</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Here's the most common silent bug in local LLM evaluation. A chat model was trained with specific markup. Maybe something like:</p>
+<blockquote class="rv"><p><code>&lt;|system|&gt; You are a helpful assistant. &lt;|user|&gt; Explain KV cache. &lt;|assistant|&gt;</code></p></blockquote>
+<p class="rv">Maybe a ChatML-style variant. Maybe it wants <code>[BOS] [INST] ... [/INST]</code>. Maybe it needs reasoning tokens. Maybe it wants tool calls in a particular XML or JSON envelope.</p>
+<p class="rv">Use the wrong template and you don't get "slightly off answers," you get: gibberish, role confusion, the model echoing your prompt, refusal weirdness, broken tool calls, bad benchmarks, and the good old classic conclusion — "this model is dumb" when the template was the actual bug.</p>
+<p class="rv"><strong>Best practices:</strong></p>
+<ul class="rv"><li>Use <code>apply_chat_template</code> from the tokenizer when you're in Transformers-land.</li><li>Use model-specific templates in Harbor-backed frontends, llama.cpp, LM Studio, vLLM, or SGLang.</li><li>Check whether your model is base, instruct, chat, reasoning, or tool-tuned. Different templates.</li><li>Sanity-check BOS/EOS. One token off can ruin your afternoon.</li><li>Keep system prompts short unless they really need to be long.</li><li>For tool use, follow the exact schema the model expects.</li></ul>
+<p class="rv">The cardinal sin: building an app that lets users swap models but hardcoding one template. That is the #1 local-model eval bug. Treat the template as an API contract. Don't be the reason your own model looks bad.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch17.html"><span class="dir">&#8592; Previous — Chapter 17</span><span class="t">Quantization — Quality Loss You Can Choose on Purpose</span></a>
+<a class="pn next" href="ch19.html"><span class="dir">Next — Chapter 19 &#8594;</span><span class="t">RAG vs. Giant Prompts</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

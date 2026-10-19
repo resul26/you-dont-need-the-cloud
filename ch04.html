@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why Your 24 Gig Card Cries at 32K Context — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 4 — Why Your 24 Gig Card Cries at 32K Context">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 4</div>
+<h1 class="chapter-title rv rv-d1">Why Your 24 Gig Card Cries at 32K Context</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Quick refresher. Inference has two regimes:</p>
+<p class="rv"><strong>PREFILL</strong> — reading your prompt, building the initial KV cache. This is <strong>compute-bound</strong>. GPUs love it. It parallelizes great. If you paste a 20,000-token document, prefill is the chunk of time where you're staring at a blank screen going "hello???"</p>
+<p class="rv"><strong>DECODE</strong> — generating answer tokens one at a time. This is <strong>memory-bandwidth-bound</strong>, and it's sequential. Each new token needs the whole model's weights streamed through, plus the growing KV cache. This is the phase that determines whether your model "feels fast."</p>
+<p class="rv">Why does this matter? Because it explains basically every hardware conversation you will ever have:</p>
+<ul class="rv"><li><strong>Short prompt, long answer?</strong> Decode is dominant. Memory bandwidth is your king. Buy for GB/s.</li><li><strong>Long prompt, short answer?</strong> Prefill is dominant. Attention kernels and chunked prefill matter.</li><li><strong>Lots of users hitting the same box?</strong> Scheduler quality becomes the thing. Continuous batching, prefix caching, fairness.</li><li><strong>Long context?</strong> KV cache is the boss fight. PagedAttention, KV quantization, possibly offloading, possibly more VRAM.</li><li><strong>MoE model?</strong> Expert routing dominates. All-to-all interconnect traffic.</li><li><strong>Multi-GPU/multi-node?</strong> Interconnect — NVLink, RDMA, PCIe pipeline — becomes the ceiling.</li></ul>
+<p class="rv">I want to emphasize this because it's the single mistake that costs people the most time: <strong>decode speed tracks memory bandwidth, not FLOPs.</strong> And people spend weeks comparing FLOPs tables for models whose decode is bandwidth-bound. You will see this constantly. Feel free to pity them, but not so much that you join in.</p>
+
+<div class="widget" id="w-pd">
+  <div class="w-head">Prefill vs Decode — same box, two completely different bottlenecks</div>
+  <div class="w-body">
+    <div class="slider-row"><label for="pd-ctx">Prompt length</label>
+      <input type="range" id="pd-ctx" min="1" max="16" value="8" step="1">
+      <span class="val" id="pd-ctx-v">2,048 tokens</span></div>
+    <div class="slider-row"><label for="pd-bw">Memory bandwidth</label>
+      <input type="range" id="pd-bw" min="150" max="1800" value="1000" step="10">
+      <span class="val" id="pd-bw-v">1,000 GB/s</span></div>
+    <div style="display:flex; gap:10px; margin:14px 0 8px"><button class="d-btn" id="pd-play">Run it</button>
+      <span class="mono" style="font-size:13px" id="pd-stats"></span></div>
+    <div class="readout-sub" style="margin:10px 0 4px">PREFILL — parallel. The GPU eats the whole prompt in batches. Compute-bound.</div>
+    <div id="pd-pre" style="display:flex; gap:2px; height:30px"></div>
+    <div class="readout-sub" style="margin:14px 0 4px">DECODE — one token at a time. Bandwidth-bound. This is the grid you actually wait on.</div>
+    <div id="pd-dec" style="display:flex; gap:2px; height:30px"></div>
+  </div>
+</div>
+<script>
+(function () {
+  var pre = document.getElementById("pd-pre"), dec = document.getElementById("pd-dec");
+  var ctx = document.getElementById("pd-ctx"), bw = document.getElementById("pd-bw");
+  var ctxV = document.getElementById("pd-ctx-v"), bwV = document.getElementById("pd-bw-v");
+  var stats = document.getElementById("pd-stats"), play = document.getElementById("pd-play");
+  var timers = [];
+  function cells(host, n) {
+    host.innerHTML = "";
+    for (var i = 0; i < n; i++) {
+      var c = document.createElement("div");
+      c.style.cssText = "flex:1 1 0; background:rgba(255,255,255,.06); border:1px solid var(--border)";
+      host.appendChild(c);
+    }
+    return Array.prototype.slice.call(host.children);
+  }
+  function update() {
+    ctxV.textContent = (parseInt(ctx.value, 10) * 256).toLocaleString() + " tokens";
+    bwV.textContent = parseInt(bw.value, 10).toLocaleString() + " GB/s";
+  }
+  function stopAll() { timers.forEach(clearTimeout); timers = []; play.textContent = "Run it"; }
+  ctx.addEventListener("input", update); bw.addEventListener("input", update);
+  play.addEventListener("click", function () {
+    stopAll();
+    var preCells = cells(pre, 16), decCells = cells(dec, 32);
+    var promptTokens = parseInt(ctx.value, 10) * 256;
+    var bandwidth = parseInt(bw.value, 10);
+    // model: 70B fp8 ≈ 70 GB streamed per decode token
+    var tokPerSec = Math.max(1, bandwidth / 70);
+    var prefillTokPerSec = 14000 * (bandwidth / 1000); // compute-ish scaling, simplified
+    var ttft = promptTokens / prefillTokPerSec; // seconds
+    var batches = 4, perBatch = ttft / batches * 1000;
+    var t = 0;
+    for (var b = 0; b < batches; b++) {
+      (function (bb) {
+        timers.push(setTimeout(function () {
+          for (var k = bb * 4; k < bb * 4 + 4; k++) preCells[k].style.background = "var(--accent)";
+        }, t + 60));
+      })(b);
+      t += Math.max(120, perBatch);
+    }
+    var decMs = 1000 / tokPerSec, decStart = t + 200;
+    decCells.forEach(function (c, i) {
+      timers.push(setTimeout(function () {
+        c.style.background = "linear-gradient(180deg, var(--accent), #7c2d12)";
+        if (i === decCells.length - 1) play.textContent = "Run it";
+      }, decStart + i * decMs));
+    });
+    stats.textContent = "TTFT ≈ " + (ttft * 1000).toFixed(0) + " ms · decode ≈ " + tokPerSec.toFixed(1) + " tok/s (70B FP8)";
+  });
+  update();
+})();
+</script>
+
+
+<p class="rv"><strong>What controls how many tokens per second you actually see?</strong> In rough order of what matters most:</p>
+<ul class="rv"><li><strong>Memory bandwidth</strong> (dominates decode, especially single-user)</li><li><strong>VRAM capacity</strong> (if you spill to CPU, speeds crater — sometimes 10–100×)</li><li><strong>Quantization</strong> (less memory means less movement means more speed — up to a point)</li><li><strong>Attention kernel quality</strong> (FlashAttention, SDPA, paged attention)</li><li><strong>Batching / concurrency</strong> (throughput per user drops as you add users but total throughput goes up)</li><li><strong>GPU FLOPs</strong> (matters for prefill and big batches; matters much less for single-user decode)</li><li><strong>Prompt length &amp; generated length</strong> (more tokens = more work, shocking nobody)</li><li><strong>Runtime overhead</strong> (CUDA graphs, sampling, tokenizer, HTTP, LoRA switching, structured decoding — they each take a couple percent and then they <em>unionize</em>)</li></ul>
+<p class="rv">The most painful setup on the planet is the almost-fit setup: the model "fits" in VRAM but spills a layer or two of weights or a chunk of KV cache to system RAM over PCIe. It runs. It runs at 2 tokens per second. And you sit there going "the math said this should work" — <em>the math did say it would fit, and it did not promise speed.</em> Capacity and bandwidth are different things. Tattoo it.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch03.html"><span class="dir">&#8592; Previous — Chapter 3</span><span class="t">The Elephant in the Room (The KV Cache)</span></a>
+<a class="pn next" href="ch05.html"><span class="dir">Next — Chapter 5 &#8594;</span><span class="t">VRAM Math — The Only Formula You'll Ever Need</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

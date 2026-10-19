@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Engine Lineup, One by One — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 12 — The Engine Lineup, One by One">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 12</div>
+<h1 class="chapter-title rv rv-d1">The Engine Lineup, One by One</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Here's the actual lineup as of 2026, organized by what they're actually for. I'm doing the one-page decision guide first and then detail underneath, because you deserve both.</p>
+<h2 class="rv">TL;DR Decision Guide</h2>
+<div class="rv" style="overflow-x:auto"><table><thead><tr><th>Your Situation</th><th>Engine</th></tr></thead><tbody><tr><td>Laptop / edge / weird hardware / CPU-heavy</td><td><strong>llama.cpp</strong></td></tr><tr><td>Mac-first workflows</td><td><strong>MLX / MLX-LM</strong></td></tr><tr><td>Single RTX (3090/4090/5090), local inference</td><td><strong>ExLlamaV2</strong></td></tr><tr><td>2–4+ NVIDIA/CUDA GPUs</td><td><strong>ExLlamaV3</strong></td></tr><tr><td>General production serving</td><td><strong>vLLM</strong></td></tr><tr><td>Long-context / MoE / fancy routing</td><td><strong>SGLang</strong></td></tr><tr><td>Max NVIDIA performance</td><td><strong>TensorRT-LLM</strong></td></tr><tr><td>Cluster orchestration</td><td><strong>NVIDIA Dynamo</strong></td></tr></tbody></table></div>
+<h2 class="rv">llama.cpp — the portability king</h2>
+<p class="rv">Runs anywhere. ARM NEON on Apple Silicon, Accelerate/Metal, AVX/AVX2/AVX512/AMX on x86, RISC-V, CUDA, HIP for AMD, MUSA, Vulkan, SYCL, hybrid CPU+GPU offload. If it's weird constrained hardware, llama.cpp probably runs on it. That's the lane it owns.</p>
+<p class="rv">The server component (<code>llama-server</code>) is real: OpenAI-compatible routes, Anthropic Messages API compatibility, reranking, continuous batching, multimodal, JSON schema constraints, function calling, speculative decoding, and a web UI. More than a "toy local runner."</p>
+<p class="rv">But: <strong>not for serious multi-GPU or multi-node production.</strong> The RPC backend is explicitly documented as proof-of-concept, fragile, and insecure. Use llama.cpp when portability, offline, GGUF, or CPU+GPU hybrid offload matter more than fleet-scale serving. This is a feature, not a criticism.</p>
+<h2 class="rv">MLX / MLX-LM — the Apple Silicon weapon</h2>
+<p class="rv">Apple's native array framework, plus the LLM package built on top. The whole reason it matters is <em>unified memory</em> — CPU and GPU read from the same pool. Large quantized models fit on a Mac where the same model would never fit on a 24 GB discrete GPU. The tradeoff: it's slower than a comparable discrete GPU. Good raw bandwidth is half the story; unified memory still isn't HBM.</p>
+<p class="rv">MLX-LM itself adds HF hub integration, quantization, LoRA and full fine-tuning, distributed inference, and a large MLX Community model set. MLX is no longer Mac-only; there are CUDA and CPU-only packages for Linux. Distributed communication supports MPI, ring/TCP, JACCL over Thunderbolt, and NCCL for CUDA.</p>
+<p class="rv">The MLX-LM server documentation literally warns that it's <strong>not recommended for production</strong> because it only implements basic security. Respect that.</p>
+<h2 class="rv">ExLlamaV2 / V3 — the consumer CUDA darlings</h2>
+<p class="rv"><strong>ExLlamaV2</strong> is the engine for people who want their one RTX card to do more than it should. Paged attention, dynamic batching, prompt caching, KV cache dedup, batched generation, streaming, speculative decoding. The keyword is <em>local</em>. Makes quantized models scream on modern CUDA cards, especially consumer ones.</p>
+<p class="rv"><strong>ExLlamaV3</strong> extends that toward multi-GPU and local MoE. Adds the EXL3 quant format (QTIP-based), flexible tensor-parallel and expert-parallel setups, OpenAI-compatible serving via TabbyAPI, continuous dynamic batching, multimodal. Compelling on 2–4+ consumer NVIDIA GPUs or local MoE work. Some models don't yet support tensor or expert parallelism in V3 — check before you build.</p>
+<h2 class="rv">vLLM — the default production answer</h2>
+<p class="rv">If you're serving more than yourself, <strong>vLLM is where you start.</strong> PagedAttention KV management, continuous batching, chunked prefill, prefix caching, CUDA/HIP graphs, broad quantization support (FP8, MXFP8/MXFP4, NVFP4, INT8, INT4, GPTQ, AWQ, GGUF), optimized attention and MoE kernels, speculative decoding, torch.compile, disaggregated prefill/decode. It's flexible too: tensor/pipeline/data/expert/context parallelism, streaming, structured outputs, OpenAI-compatible and Anthropic-compatible APIs, gRPC, multi-LoRA, runs on NVIDIA / AMD / x86 / ARM / PowerPC / Apple Silicon via plugins.</p>
+<p class="rv">It still needs systems thinking — you have to tune batching, context, parallelism for your real workload. "vLLM is production-ready" doesn't mean "vLLM is production-idempotent." It's a tool that rewards operational maturity.</p>
+<h2 class="rv">SGLang — the systems-brained cousin</h2>
+<p class="rv">vLLM's sibling for people who think deeply. RadixAttention prefix caching, prefill-decode disaggregation, structured output, strong with long context, strong with MoE. If structured outputs, long context, multi-LoRA, MoE, or routing matter, SGLang deserves a benchmark slot.</p>
+<h2 class="rv">TensorRT-LLM — the NVIDIA max</h2>
+<p class="rv">Converts checkpoints into compiled TensorRT engines. Costs time and GPU memory upfront. Rewards you with the best per-GPU throughput on NVIDIA hardware. FP8 on H100+ roughly doubles performance and halves memory vs FP16. You trade portability for performance. If you're all-in on NVIDIA datacenter, this is the endgame.</p>
+<h2 class="rv">And one warning</h2>
+<blockquote class="rv"><p>Many tutorials recommend Ollama because it's convenient. For production serving, stay away from it. Production means security, observability, backpressure, routing, autoscaling, and SLA behavior — none of which a casual local runner guarantees.</p></blockquote>
+<p class="rv">That's not me being precious. That's Ahmad in his article team, and it's what every serious operator will tell you after their first "how did this get hacked" incident. Ollama is fine for "seeing what's up," not for putting in front of real users.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch11.html"><span class="dir">&#8592; Previous — Chapter 11</span><span class="t">Inference Engines — You're Not Picking an Engine, Dummy</span></a>
+<a class="pn next" href="ch13.html"><span class="dir">Next — Chapter 13 &#8594;</span><span class="t">Prefill, Decode, and Why Your Demo Lied to You</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

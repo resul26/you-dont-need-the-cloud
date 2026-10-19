@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The 2026 Hardware Zoo (Real Boxes, Real Numbers) — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 9 — The 2026 Hardware Zoo (Real Boxes, Real Numbers)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 9</div>
+<h1 class="chapter-title rv rv-d1">The 2026 Hardware Zoo (Real Boxes, Real Numbers)</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Alright. Let me read you the menu as of mid-2026. Numbers come straight from Ahmad's articles — I checked them, they're solid. Memorize clusters, not individual numbers; Jensen moves fast but physics doesn't.</p>
+<p class="rv"><strong>THE BANDWIDTH TIERS (a.k.a. the only chart that matters)</strong></p>
+<ul class="rv"><li><strong>1.8 TB/s class</strong> — RTX PRO 6000 Blackwell (96 GB), RTX 5090 (32 GB). This is the peak of what a normal person can plausibly buy.</li><li><strong>800 GB/s class</strong> — Mac Studio M3 Ultra (819 GB/s, up to 512 GB unified memory).</li><li><strong>450–650 GB/s class</strong> — MacBook Pro M5 Max (460–614), Mac Studio M4 Max (546), AMD Radeon PRO R9700 (640), Tenstorrent Blackhole p150 (512). Real workstation tier.</li><li><strong>250–300 GB/s class</strong> — DGX Spark (128 GB unified, 273 GB/s), Mac mini M4 Pro (273 GB/s), AMD Ryzen AI Max / Strix Halo (256 GB/s). This is "unified memory starts being interesting."</li><li><strong>Below 150 GB/s class</strong> — MacBook Air M5 (153), Snapdragon X2 Elite (up to 228), Snapdragon X Elite (135), Intel Lunar Lake (136). Thin-and-light AI PC territory.</li></ul>
+<p class="rv">&lt;threshold rules to remember&gt;</p>
+
+<div class="widget" id="w-tiers">
+  <div class="w-head">The 2026 bandwidth ladder — filter it, then memorize the tiers</div>
+  <div class="w-body">
+    <div class="seg" id="tier-filter" style="margin-bottom:20px">
+      <button data-f="all" class="on">All</button><button data-f="gpu">Discrete GPUs</button>
+      <button data-f="apple">Apple</button><button data-f="uni">Unified x86 / NVIDIA appliance</button><button data-f="thin">“AI PC” class</button>
+    </div>
+    <div id="tier-bars"></div>
+    <p class="readout-sub" style="margin-top:14px">Below ~150 GB/s is thin-and-light. ~250–300 is where unified memory gets interesting. 450–650 is a serious workstation. 800+ is expensive, powerful, and fun. Capacity is not on this chart — that's the other axis. Capacity vs. bandwidth scatter lives in Chapter 8.</p>
+  </div>
+</div>
+<script>
+(function () {
+  var DATA = [
+    ["RTX PRO 6000 Blackwell", 1792, "gpu", "96 GB"],
+    ["RTX 5090", 1792, "gpu", "32 GB"],
+    ["RTX 4090", 1008, "gpu", "24 GB"],
+    ["RX 7900 XTX", 960, "gpu", "24 GB"],
+    ["Radeon PRO W7900", 864, "gpu", "48 GB"],
+    ["Mac Studio M3 Ultra", 819, "apple", "up to 512 GB unified"],
+    ["Radeon AI PRO R9700", 640, "gpu", "32 GB"],
+    ["MacBook Pro M5 Max", 614, "apple", "up to 128 GB"],
+    ["Intel Arc Pro B65", 608, "gpu", "32 GB"],
+    ["Mac Studio M4 Max", 546, "apple", "up to 128 GB"],
+    ["Tenstorrent Blackhole p150", 512, "uni", "32 GB · fully OSS stack"],
+    ["DGX Spark", 273, "uni", "128 GB coherent + NVIDIA stack"],
+    ["Mac mini M4 Pro", 273, "apple", "small but real"],
+    ["Strix Halo / Ryzen AI Max", 256, "uni", "up to 128 GB"],
+    ["Snapdragon X2 Elite", 190, "thin", "“AI PC”"],
+    ["MacBook Air M5", 153, "thin", "“AI PC”"],
+    ["Intel Lunar Lake", 136, "thin", "“AI PC”"],
+    ["Snapdragon X Elite", 135, "thin", "“AI PC”"]
+  ];
+  var COLORS = { gpu: "#F05A28", apple: "#e8c15a", uni: "#7ea6d8", thin: "#8a929b" };
+  var host = document.getElementById("tier-bars");
+  function render(filter) {
+    host.innerHTML = "";
+    DATA.forEach(function (d) {
+      if (filter !== "all" && d[2] !== filter) return;
+      var row = document.createElement("div");
+      row.style.cssText = "display:grid; grid-template-columns: 210px 1fr 84px; gap:12px; align-items:center; margin:7px 0";
+      var name = document.createElement("div");
+      name.style.cssText = "font-size:13.5px; color:var(--ink-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap";
+      name.textContent = d[0];
+      var barWrap = document.createElement("div");
+      barWrap.style.cssText = "height:20px; background:rgba(255,255,255,.04); position:relative";
+      var bar = document.createElement("div");
+      bar.style.cssText = "height:100%; width:" + (Math.pow(d[1] / 1792, 0.6) * 100).toFixed(1) + "%; background:" + COLORS[d[2]] + "; transition:width .5s cubic-bezier(.2,.7,.2,1)";
+      barWrap.appendChild(bar);
+      var val = document.createElement("div");
+      val.style.cssText = "font:500 12.5px var(--font-mono); color:var(--ink-dim); text-align:right";
+      val.textContent = d[1] >= 1000 ? (d[1] / 1000).toFixed(2).replace(/0$/, "") + " TB/s" : d[1] + " GB/s";
+      val.title = d[3];
+      row.appendChild(name); row.appendChild(barWrap); row.appendChild(val);
+      host.appendChild(row);
+    });
+  }
+  document.getElementById("tier-filter").addEventListener("click", function (e) {
+    if (e.target.tagName !== "BUTTON") return;
+    document.querySelectorAll("#tier-filter button").forEach(function (b) { b.classList.remove("on"); });
+    e.target.classList.add("on");
+    render(e.target.getAttribute("data-f"));
+  });
+  render("all");
+})();
+</script>
+
+
+<ul class="rv"><li>Below ~150 GB/s → thin-and-light. Fine for small models, assistants, edge. Not for serious work.</li><li>~250–300 GB/s → unified memory starts being genuinely useful. Strix Halo, DGX Spark, M4 Pro mini.</li><li>~450–650 GB/s → serious workstation. You can do real agentic work, meaningful local coding assistants, decent concurrency.</li><li>800+ GB/s → expensive, powerful, and fun.</li></ul>
+<p class="rv"><strong>DISCRETE GPU REALITY</strong></p>
+<p class="rv">Still the decode kings when the model fits:</p>
+<ul class="rv"><li><strong>RTX PRO 6000 Blackwell</strong> — 96 GB @ 1792 GB/s. The dream.</li><li><strong>RTX 5090</strong> — 32 GB @ 1792 GB/s. The realistic dream.</li><li><strong>RTX 4090</strong> — 24 GB @ 1008 GB/s. Still excellent.</li><li><strong>AMD Radeon PRO W7900</strong> — 48 GB @ 864 GB/s. The "I want some non-NVIDIA options" answer.</li><li><strong>AMD RX 7900 XTX</strong> — 24 GB @ 960 GB/s. Good bang-for-buck.</li><li><strong>AMD Radeon AI PRO R9700</strong> — 32 GB @ 640 GB/s. Good capacity, moderate speed.</li><li><strong>Intel Arc Pro</strong> — rising. Fine to watch, but not default.</li></ul>
+<p class="rv"><strong>APPLE REALITY</strong></p>
+<p class="rv">The pitch: <strong>"not the fastest, but usable, and one box with a lot of memory."</strong></p>
+<ul class="rv"><li>Mac Studio M3 Ultra — 819 GB/s, up to 512 GB unified. The one-box dream for big models.</li><li>MacBook Pro M5 Max — up to 614 GB/s. The portable high end.</li><li>Mac mini M4 Pro — 273 GB/s. Small but real.</li></ul>
+<p class="rv">When Apple wins: you want quiet, one box, no drivers, no dual-GPU drama, and "stupid amounts of memory" matters more than raw tokens/sec. When Apple loses: you want maximum tokens/sec per dollar, or you want to run multi-agent workloads at scale. The MLX ecosystem is good, but its server software says, in writing, that it is not recommended for production. That's not a slur. That's their lawyers talking.</p>
+<p class="rv"><strong>DGX SPARK</strong></p>
+<p class="rv">128 GB unified memory, 273 GB/s, full NVIDIA software stack. Bandwidth is unimpressive. The coherent memory plus the real NVIDIA stack is the point. NVFP4 support is there but immature. It's a developer appliance, not a race car. If that sounds like your situation, it probably is.</p>
+<p class="rv"><strong>STRIX HALO / RYZEN AI MAX</strong></p>
+<p class="rv">256-bit LPDDR5X, up to 128 GB memory, ~256 GB/s bandwidth, exposes ~96 GB as GPU memory. The first genuinely legitimate x86 unified-memory play. Also why the little Framework Desktop boxes are interesting.</p>
+<p class="rv"><strong>TENSTORRENT</strong></p>
+<p class="rv">Wormhole n300 at 24 GB / 576 GB/s. Blackhole p150 at 32 GB / 512 GB/s + 800G interconnect. Fully open-source stack. Ahmad says he's watching it and so am I. Open stacks are good for the world and Tenstorrent keeps showing up.</p>
+<p class="rv"><strong>MULTI-GPU?</strong></p>
+<p class="rv">More GPUs ≠ linear scaling. Once you go past one card, you are now buying interconnect (PCIe vs NVLink vs RDMA), topology, sync overhead, and software maturity. Also, <strong>do not use llama.cpp or Ollama on multi-GPU setups</strong> — use vLLM or ExLlamaV3+. That's a direct quote and every official doc backs it.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch08.html"><span class="dir">&#8592; Previous — Chapter 8</span><span class="t">Capacity vs. Bandwidth — Two Different Animals</span></a>
+<a class="pn next" href="ch10.html"><span class="dir">Next — Chapter 10 &#8594;</span><span class="t">The AI PC Trap</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

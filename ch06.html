@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The VRAM Tax Nobody Mentions Until It's Too Late — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 6 — The VRAM Tax Nobody Mentions Until It's Too Late">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 6</div>
+<h1 class="chapter-title rv rv-d1">The VRAM Tax Nobody Mentions Until It's Too Late</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Here's the part that breaks people. They do the Chapter 5 math, they confirm that the 13B model "fits" in 8 GB of VRAM, they load it, and it crashes on the second prompt. Why? Because <strong>weights are only part of the bill.</strong></p>
+<p class="rv">Your total memory consumption, in roughly the order you'll discover it:</p>
+<ul class="rv"><li><strong>Model weights</strong> — the formula from Chapter 5. Easy. Predictable.</li><li><strong>KV cache</strong> — Chapter 3. Grows with context length. Quadratically in your soul, linearly in RAM. This is the silent killer.</li><li><strong>Activations</strong> — runtime-managed, but vary a lot by optimization level. Some runtimes hog more than others.</li><li><strong>Batch / concurrency memory</strong> — every concurrent request gets its own cache slice.</li><li><strong>Framework overhead</strong> — Transformers, vLLM, TensorRT-LLM, llama.cpp all take different cuts. CUDA graphs reserve extra memory for latency stability.</li><li><strong>Speculative decoding memory</strong> — draft models, draft heads, verification buffers. They're not free.</li><li><strong>LoRA adapters</strong> — small, but nonzero.</li><li><strong>Vision encoders</strong> — your "single image" is a few thousand extra context tokens plus some extra memory. Count it.</li></ul>
+<p class="rv">A realistic estimate looks like:</p>
+<blockquote class="rv"><p>total memory ≈ quantized weights + KV cache at your context + runtime overhead + concurrency overhead + safety margin</p></blockquote>
+<p class="rv">And the classic failure mode: <strong>a 13B model in Q4 fits at 8K context, and then dies at 32K because the KV cache quadrupled and there was no headroom.</strong> The weights didn't change. The context did.</p>
+<p class="rv">Rule of thumb, and genuinely just memorize it:</p>
+<blockquote class="rv"><p><strong>Add 10–30% extra VRAM for a comfortable run. Add more if you're doing long context, high concurrency, or agent workloads.</strong></p>
+
+<div class="widget" id="w-vram">
+  <div class="w-head">The Formula — VRAM ≈ params × bits ÷ 8 (+ the tax). Try every combination.</div>
+  <div class="w-body">
+    <div class="slider-row"><label for="vr-params">Parameters</label>
+      <input type="range" id="vr-params" min="1" max="405" value="13" step="1">
+      <span class="val" id="vr-params-v">13B</span></div>
+    <div class="slider-row"><label>Quantization</label>
+      <div class="seg" id="vr-quant">
+        <button data-g="2.0">FP16</button><button data-g="1.0">FP8</button>
+        <button data-g="0.82">Q6</button><button data-g="0.69">Q5</button>
+        <button data-g="0.56" class="on">Q4</button><button data-g="0.43">Q3</button><button data-g="0.33">Q2</button>
+      </div></div>
+    <div class="slider-row"><label for="vr-ctx">Context</label>
+      <input type="range" id="vr-ctx" min="2" max="128" value="8" step="1">
+      <span class="val" id="vr-ctx-v">8K</span></div>
+    <div class="slider-row"><label>Your GPU</label>
+      <div class="seg" id="vr-gpu">
+        <button data-g="8">8 GB</button><button data-g="12">12 GB</button><button data-g="16">16 GB</button>
+        <button data-g="24" class="on">24 GB</button><button data-g="48">48 GB</button><button data-g="80">80 GB</button>
+      </div></div>
+    <div class="big-readout"><span class="o" id="vr-total">8.8</span> <span style="font-size:.5em;color:var(--ink-mute)">GB needed</span></div>
+    <div class="readout-sub" id="vr-break"></div>
+    <div style="height:34px; background:rgba(255,255,255,.05); border:1px solid var(--border); position:relative; margin:16px 0 6px">
+      <div id="vr-fill" style="position:absolute; top:0; left:0; bottom:0; background:linear-gradient(90deg, #6fc276, #F05A28); width:30%"></div>
+      <div style="position:absolute; right:8px; top:5px; font:600 12px var(--font-mono); color:var(--ink-dim)" id="vr-gpulabel">24 GB budget (85% used as safe ceiling)</div>
+    </div>
+    <div class="verdict" id="vr-verdict"></div>
+    <p class="readout-sub" style="margin-top:16px">Estimates only. Weights = params × GB-per-billion for the quant. KV cache assumes a GQA-class model scaled with size (the appendix has the exact per-model math). Overhead = 20% for runtime + activations + headroom. Your mileage will vary by engine — measure, don’t trust, this included.</p>
+  </div>
+</div>
+<script>
+(function () {
+  var state = { p: 13, q: 0.56, ctx: 8, gpu: 24 };
+  function seg(id, key, cast) {
+    var host = document.getElementById(id);
+    host.addEventListener("click", function (e) {
+      if (e.target.tagName !== "BUTTON") return;
+      host.querySelectorAll("button").forEach(function (b) { b.classList.remove("on"); });
+      e.target.classList.add("on");
+      state[key] = cast(e.target.getAttribute("data-g"));
+      update();
+    });
+  }
+  seg("vr-quant", "q", parseFloat); seg("vr-gpu", "gpu", parseFloat);
+  var pEl = document.getElementById("vr-params"), cEl = document.getElementById("vr-ctx");
+  pEl.addEventListener("input", function () { state.p = parseInt(pEl.value, 10); update(); });
+  cEl.addEventListener("input", function () { state.ctx = parseInt(cEl.value, 10); update(); });
+  function update() {
+    var weights = state.p * state.q;
+    // GQA-ish per-token KV (MiB), scaled with sqrt of size vs 7B baseline of 0.13 MiB/tok
+    var kvMiB = 0.13 * Math.sqrt(state.p / 7);
+    var kvGB = kvMiB * state.ctx * 1024 / 1024;
+    var overhead = 1.20;
+    var total = (weights + kvGB) * overhead;
+    document.getElementById("vr-params-v").textContent = state.p + "B";
+    document.getElementById("vr-ctx-v").textContent = state.ctx + "K";
+    document.getElementById("vr-total").textContent = total < 10 ? total.toFixed(1) : Math.round(total);
+    document.getElementById("vr-break").textContent =
+      "weights " + weights.toFixed(1) + " GB + KV " + kvGB.toFixed(1) + " GB, ×1.2 overhead = " + total.toFixed(1) + " GB total";
+    var safe = state.gpu * 0.85;
+    var pct = Math.min(100, total / state.gpu * 100);
+    var fill = document.getElementById("vr-fill");
+    fill.style.width = pct + "%";
+    fill.style.background = total <= safe ? "linear-gradient(90deg,#3f7d45,#6fc276)" : "linear-gradient(90deg,#7c2d12,#F05A28)";
+    var v = document.getElementById("vr-verdict");
+    var fits = total <= safe;
+    v.className = "verdict " + (fits ? "yes" : "no");
+    v.innerHTML = fits
+      ? "✓ Fits on " + state.gpu + " GB (using " + pct.toFixed(0) + "% of the card, safe ceiling 85%). " +
+        (state.q > 0.7 ? "You could even spend some quality: try FP8 or Q6." : "Now go do useful things with the headroom.")
+      : "✗ " + total.toFixed(1) + " GB does not fit in " + state.gpu + " GB. Options: drop a quant level, shorten context, or buy more card. That's the whole game.";
+  }
+  update();
+})();
+</script>
+
+</blockquote>
+<p class="rv">And don't run at 99% VRAM utilization. Spinning all the way to the ceiling is begging for OOMs and fragmentation. 80–90% is the ceiling you pretend is the ceiling. That's the "memory gate":</p>
+<blockquote class="rv"><p><strong>weights + KV + overhead ≤ 80–90% of available memory</strong></p></blockquote>
+<p class="rv">Okay. Two more major traps in this neighborhood. Next chapter.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch05.html"><span class="dir">&#8592; Previous — Chapter 5</span><span class="t">VRAM Math — The Only Formula You'll Ever Need</span></a>
+<a class="pn next" href="ch07.html"><span class="dir">Next — Chapter 7 &#8594;</span><span class="t">MoE, GGUF, and Other Things That Aren't Magic</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

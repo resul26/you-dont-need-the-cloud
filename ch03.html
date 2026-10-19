@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Elephant in the Room (The KV Cache) — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 3 — The Elephant in the Room (The KV Cache)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 3</div>
+<h1 class="chapter-title rv rv-d1">The Elephant in the Room (The KV Cache)</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Alright. This is the chapter you skip at your own peril, because the KV cache is the #1 reason people buy the wrong hardware.</p>
+<p class="rv">The <strong>KV cache</strong> is the model's working memory during generation. Every token you've fed it, every token it's generated — the model stores attention state (the K and V matrices) for those positions so it doesn't have to recompute the whole conversation on every new token.</p>
+<p class="rv">The formula, so you can see why it explodes:</p>
+<blockquote class="rv"><p><strong>KV cache size ≈ tokens × layers × kv_heads × head_dim × precision × 2</strong></p></blockquote>
+<p class="rv">That <code>× 2</code> at the end is for keys <em>and</em> values. Yep.</p>
+<p class="rv">Rule of thumb for an old-school Llama-style 7B MHA model in FP16: <strong>about 0.5 MiB of KV cache per token.</strong> That sounds fine until you do the math:</p>
+<ul class="rv"><li>4K token conversation → ~2 GiB of KV cache.</li><li>32K token conversation → ~16 GiB. <em>Just for the cache.</em> Not weights. Cache.</li><li>128K context on a beefier modern model → you need a planning meeting.</li></ul>
+<p class="rv">This is the whole secret: <strong>the model that "fits" on your card at empty prompt will OOM (out of memory) on the third long conversation you throw at it,</strong> because the KV cache grew quadratically in your mind's eye but linearly in reality, and reality always wins.</p>
+
+<div class="widget" id="w-kv">
+  <div class="w-head">KV Cache simulator — watch the cache grow before your eyes</div>
+  <div class="w-body">
+    <div class="slider-row">
+      <label>Model</label>
+      <div class="seg" id="kv-model">
+        <button data-v="7" class="on">7B-class</button><button data-v="13">13B-class</button><button data-v="70">70B-class</button>
+      </div>
+    </div>
+    <div class="slider-row">
+      <label>Attention</label>
+      <div class="seg" id="kv-attn">
+        <button data-v="mha">MHA</button><button data-v="gqa" class="on">GQA</button><button data-v="mqa">MQA</button>
+      </div>
+    </div>
+    <div class="slider-row">
+      <label>KV precision</label>
+      <div class="seg" id="kv-prec">
+        <button data-v="2" class="on">FP16</button><button data-v="1">FP8</button>
+      </div>
+    </div>
+    <div class="slider-row">
+      <label for="kv-ctx">Context</label>
+      <input type="range" id="kv-ctx" min="1" max="128" value="8" step="1">
+      <span class="val" id="kv-ctx-v">8K</span>
+    </div>
+    <div class="big-readout"><span id="kv-gb">0.5</span> <span style="font-size:.45em;color:var(--ink-mute)">GB of KV cache</span></div>
+    <div class="readout-sub"><span id="kv-pertok"></span> MiB per token · weights not included. This is <b>on top of the model</b>.</div>
+    <div class="kv-bars" id="kv-bars"></div>
+    <div class="verdict" id="kv-verdict"></div>
+    <p class="readout-sub" style="margin-top:16px">Bars = cache size from 1K to your selected context, 2K steps. Formula: 2 × layers × KV-heads × head-dim × bytes-per-value. 7B-class: 32 layers / 32 heads (8 GQA, 1 MQA) × 128. 13B-class: 40/40 (8/1) × 128. 70B-class: 80/64 (8/1) × 128.</p>
+  </div>
+</div>
+<script>
+(function () {
+  var MODELS = {
+    7:  { L: 32, mha: 32, gqa: 8, mqa: 1, d: 128, w4: 3.5 },
+    13: { L: 40, mha: 40, gqa: 8, mqa: 1, d: 128, w4: 6.5 },
+    70: { L: 80, mha: 64, gqa: 8, mqa: 1, d: 128, w4: 35 }
+  };
+  var state = { m: "7", attn: "gqa", prec: 2, ctx: 8 };
+  var ctxEl = document.getElementById("kv-ctx");
+  function seg(id, key) {
+    var host = document.getElementById(id);
+    host.addEventListener("click", function (e) {
+      if (e.target.tagName !== "BUTTON") return;
+      host.querySelectorAll("button").forEach(function (b) { b.classList.remove("on"); });
+      e.target.classList.add("on");
+      state[key] = e.target.getAttribute("data-v");
+      update();
+    });
+  }
+  seg("kv-model", "m"); seg("kv-attn", "attn"); seg("kv-prec", "prec");
+  ctxEl.addEventListener("input", function () { state.ctx = parseInt(ctxEl.value, 10); update(); });
+
+  function update() {
+    var M = MODELS[state.m];
+    var kvh = M[state.attn];
+    var perTokenMiB = 2 * M.L * kvh * M.d * parseInt(state.prec, 10) / 1048576;
+    var gb = perTokenMiB * state.ctx * 1024 / 1024;
+    document.getElementById("kv-gb").textContent = gb < 10 ? gb.toFixed(1) : Math.round(gb);
+    document.getElementById("kv-pertok").textContent = perTokenMiB.toFixed(3);
+    document.getElementById("kv-ctx-v").textContent = state.ctx + "K";
+    var total = gb + M.w4;
+    var v = document.getElementById("kv-verdict");
+    var fits24 = total <= 24 * 0.85;
+    v.className = "verdict " + (fits24 ? "yes" : "no");
+    v.innerHTML = fits24
+      ? "✓ On a 24 GB card with a 4-bit " + state.m + "B model (~" + M.w4 + " GB weights): total ≈ <b>" + total.toFixed(1) + " GB</b> — it fits, with breathing room."
+      : "✗ Cache (~" + gb.toFixed(1) + " GB) + weights (~" + M.w4 + " GB) = <b>~" + total.toFixed(1) + " GB</b> — blows past a 24 GB card at this context. Shorten context, quantize the cache, or pick a smaller attention budget.";
+    // bars: 2K steps up to ctx (cap 48 bars)
+    var bars = document.getElementById("kv-bars");
+    bars.innerHTML = "";
+    var n = Math.min(48, Math.floor(state.ctx / 2) + 1);
+    for (var k = 1; k <= n; k++) {
+      var tk = Math.min(state.ctx, k * 2);
+      var g = perTokenMiB * tk * 1024 / 1024;
+      var b = document.createElement("div");
+      b.className = "bar";
+      b.style.height = Math.max(3, Math.min(110, g / Math.max(gb, 0.001) * 110)) + "px";
+      b.setAttribute("data-tip", tk + "K → " + g.toFixed(2) + " GB");
+      bars.appendChild(b);
+    }
+  }
+  update();
+})();
+</script>
+
+
+<p class="rv">Good news: modern models make this manageable:</p>
+<ul class="rv"><li><strong>GQA/MQA</strong> cut KV heads down from "tons" to "a couple." Big savings.</li><li><strong>FP8 / INT8 KV cache</strong> is a real, production-usable feature in runtimes like vLLM in 2026. Cuts cache in half. Slight quality dip. Worth it.</li><li><strong>Sub-8-bit KV cache</strong> (KIVI, KVQuant, the 2-bit / 4-bit research stuff) — <em>works</em>, but works the way surgery works. You need calibration, custom kernels, careful algorithms. It's NOT a checkbox in LM Studio. Do not flip it on for coding, tool use, JSON, or long-context retrieval and then get surprised when your answers stop making sense. Benchmark hard or don't touch it.</li></ul>
+<p class="rv">Also — important distinction that trips people up:</p>
+<blockquote class="rv"><p><strong>KV cache compression ≠ speculative decoding.</strong></p></blockquote>
+<p class="rv">DFlash, DDTree (DTree), EAGLE, MTP — those attack <em>latency</em> by drafting tokens and verifying them. They make the model faster. They do <strong>not</strong> make the KV cache smaller. Your memory bill is the same. Your speed bill goes down. Different problems, different tools. People mash them together in comments constantly and it's maddening.</p>
+<p class="rv">Now, keep that 0.5 MiB/token number in the back of your mind. Because in the next chapter, we're going to look at why <em>when</em> you spend those tokens changes everything about how fast the box feels.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch02.html"><span class="dir">&#8592; Previous — Chapter 2</span><span class="t">Bits, Bytes, and Bullshit (Tokens, Transformers &amp; Attention)</span></a>
+<a class="pn next" href="ch04.html"><span class="dir">Next — Chapter 4 &#8594;</span><span class="t">Why Your 24 Gig Card Cries at 32K Context</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

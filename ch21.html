@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Is Not Free — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 21 — Privacy Is Not Free">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 21</div>
+<h1 class="chapter-title rv rv-d1">Privacy Is Not Free</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Headline: <strong>local improves privacy. Local does not automatically give you security.</strong></p>
+<p class="rv">Things that still threaten you in the local setting:</p>
+<ul class="rv"><li>Malicious model files. Stick to safetensors, GGUF from reputable sources. Skip sketchy <code>.bin</code> files. Don't enable <code>trust_remote_code</code> casually.</li><li>Pickle-based weight loading. Avoid when possible.</li><li>Prompt injection through RAG. Retrieved documents can carry adversarial instructions.</li><li>Tool-call abuse. Schema-validate everything.</li><li>Secret leaks through logs, console output, or export paths.</li><li>Desktop app telemetry. Review it. Many apps phone home.</li><li>Browser extensions around your local tools.</li><li>Hallucinations in high-stakes settings. Local doesn't make results true.</li><li>License violations. Open-weight ≠ do whatever you want.</li><li>Data contamination during fine-tuning.</li></ul>
+<p class="rv">A workable baseline:</p>
+<ul class="rv"><li><strong>Load carefully.</strong> Prefer safetensors / GGUF from reputable sources. Skip sketchy files. No casual <code>trust_remote_code</code>.</li><li><strong>Run with boundaries.</strong> Unprivileged user. Containers for agents. No network access when offline privacy matters.</li><li><strong>Protect secrets.</strong> Keep credentials out of prompts and out of vector stores. Validate tool calls before execution.</li><li><strong>Version what matters.</strong> Model, prompt, adapter, runtime, quantization. Log enough for debugging — not so much that the logs become a leak.</li></ul>
+<blockquote class="rv"><p><strong>Local AI security is mostly boring operational discipline.</strong></p></blockquote>
+<p class="rv">Boring is good. Boring is what saves you when someone hands you a "totally safe, bro, I compiled it myself" checkpoint.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch20.html"><span class="dir">&#8592; Previous — Chapter 20</span><span class="t">Agents with Guardrails</span></a>
+<a class="pn next" href="ch22.html"><span class="dir">Next — Chapter 22 &#8594;</span><span class="t">Failure Modes and Fixes</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MoE, GGUF, and Other Things That Aren't Magic — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 7 — MoE, GGUF, and Other Things That Aren't Magic">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 7</div>
+<h1 class="chapter-title rv rv-d1">MoE, GGUF, and Other Things That Aren't Magic</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv"><strong>The MoE trap.</strong> Mixture-of-Experts sounds bigger than it runs. "8x7B" reads like 56B. It's not.</p>
+<ul class="rv"><li>Only a <em>subset</em> of experts runs on any given token. Compute per token is small.</li><li><strong>Compute cost ≠ memory cost.</strong> Total parameters affect whether it fits; active parameters affect how fast it runs.</li></ul>
+<p class="rv">Depending on loading: you might need memory for <em>all</em> the experts anyway (common on local setups), or you can shard experts across GPUs (more advanced). Treating MoE like a dense model leads you to either wildly overestimate or wildly underestimate. Neither is fun. Both are common.</p>
+<p class="rv"><strong>GGUF is not magic.</strong> GGUF is great. It's also, specifically, <em>the llama.cpp ecosystem's binary format</em>. Those magical Q4_K_M numbers you saw? They're true <strong>inside llama.cpp</strong>.</p>
+<p class="rv">The moment you load the same model into a different runtime, it might:</p>
+<ul class="rv"><li>Dequantize parts of the model back to higher precision</li><li>Hold extra copies for operational reasons</li><li>Use a different memory layout</li></ul>
+<p class="rv">"It fits in 6 GB" is <em>runtime-specific truth</em>. Ask "in what engine" before you trust any such claim.</p>
+<p class="rv"><strong>safetensors vs. .bin.</strong> One is a safe file format that just holds tensors. The other is Python pickle — which can, in principle, execute arbitrary code when loaded. Local AI security rule #1:</p>
+<blockquote class="rv"><p><strong>Do not let a stranger's model file become a stranger's code execution.</strong></p></blockquote>
+<p class="rv">Use safetensors whenever possible. Avoid random <code>.bin</code> files from untrusted sources. Do not enable <code>trust_remote_code</code> if you don't understand why it needs to run remote code. These are the boring rules that save you from the exciting problems.</p>
+<p class="rv"><strong>One-line summary of formats:</strong></p>
+<ul class="rv"><li><strong>safetensors</strong> — safe, default for PyTorch/Transformers folks.</li><li><strong>GGUF</strong> — llama.cpp's quantized format. LM Studio uses it. It's everywhere in the desktop world.</li><li><strong>ONNX</strong> — standardized deployment, useful especially outside the typical PyTorch stack (Intel NPUs, ARM, custom silicon).</li><li><strong>EXL2 / EXL3</strong> — ExLlama's local CUDA quant formats.</li><li><strong>GPTQ / AWQ</strong> — the older GPU quant formats, still common.</li><li><strong>TensorRT format</strong> — meant for TensorRT-LLM on NVIDIA data-center paths.</li></ul>
+<p class="rv">The format decision isn't cosmetic. It decides what engines can run your model, in what quant, and at what speed. Pick the engine first (we'll get there), then find the model in the right format for that engine.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch06.html"><span class="dir">&#8592; Previous — Chapter 6</span><span class="t">The VRAM Tax Nobody Mentions Until It's Too Late</span></a>
+<a class="pn next" href="ch08.html"><span class="dir">Next — Chapter 8 &#8594;</span><span class="t">Capacity vs. Bandwidth — Two Different Animals</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Benchmarks — Stop Reading Charts You Don't Understand — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 14 — Benchmarks — Stop Reading Charts You Don't Understand">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 14</div>
+<h1 class="chapter-title rv rv-d1">Benchmarks — Stop Reading Charts You Don't Understand</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">A Reddit comment: <em>"Dude I got 180 tokens/sec on my 4090."</em></p>
+<p class="rv">Meaningless. A benchmark is only a benchmark if it records:</p>
+<ul class="rv"><li>Exact model name and variant ("Qwen 3.6 27B Instruct" not "a 27B")</li><li>Weights format and quantization (EXL3 Q5, GGUF Q4_K_M, FP16, etc.)</li><li>Engine and version ("vLLM 0.4.2, CUDA 12.8")</li><li>Hardware (exact GPU, VRAM, driver version, RAM if relevant)</li><li>Input and output distribution (average prompt length? output length? mix?)</li><li>Concurrency (1 user? 10? 100? queue depth?)</li><li>Latency percentiles (p50, p95, p99, TTFT, TPOT)</li><li>Memory behavior under load (peak VRAM, KV cache use, fragmentation fail rate)</li><li>Cost per 1M tokens (for serving setups)</li></ul>
+<p class="rv"><strong>The golden rule:</strong> <em>never compare engines on single-user tokens per second.</em> Single-user speed is the number that everything downstream makes worse; it's marketing speed. Test your actual prompt and output distribution, with realistic concurrency, on the hardware you actually have.</p>
+<p class="rv">And on leaderboards generally: <strong>leaderboards are for discovery. They are not a substitute for your own evals.</strong> The BF16 leaderboard number is not your Q4 24GB reality. Your workload is the benchmark that matters. Build a small eval set — 30 to 100 prompts from your real use — include expected answers, include latency and memory measurements, include failure categories, and evaluate candidates against that. Then pick.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch13.html"><span class="dir">&#8592; Previous — Chapter 13</span><span class="t">Prefill, Decode, and Why Your Demo Lied to You</span></a>
+<a class="pn next" href="ch15.html"><span class="dir">Next — Chapter 15 &#8594;</span><span class="t">"It Runs" vs. "It Serves"</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

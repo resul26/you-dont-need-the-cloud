@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to Grow Your Stack — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 23 — How to Grow Your Stack">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 23</div>
+<h1 class="chapter-title rv rv-d1">How to Grow Your Stack</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Alright, the growth path. Nobody needs to start at TensorRT-LLM. Start where your problem actually is.</p>
+<p class="rv"><strong>Beginner — Easiest Useful Setup</strong></p>
+<ul class="rv"><li>Stack: Harbor or LM Studio</li><li>Model: recent 4B–9B instruct, Q4 quant, 8K–32K context</li><li>Goal: learn prompting, compare models, understand speed and memory, avoid custom code.</li></ul>
+<p class="rv"><strong>Intermediate — Developer Setup</strong></p>
+<ul class="rv"><li>Stack: llama.cpp or Transformers, GGUF or safetensors, OpenAI-compatible local server, simple RAG, small eval set</li><li>Goal: build local apps, test retrieval, measure quality, serve from localhost to real scripts.</li></ul>
+<p class="rv"><strong>Advanced — Private Serving Setup</strong></p>
+<ul class="rv"><li>Stack: vLLM or SGLang, 1+ GPUs, OpenAI-compatible API, monitoring, prompt/version management, eval suite, RAG with reranking, tool sandboxing</li><li>Goal: serve real users / internal workflows, tune throughput and latency, maintain safety and observability.</li></ul>
+<p class="rv"><strong>Expert — Custom Optimization</strong></p>
+<ul class="rv"><li>Stack: TensorRT-LLM, custom kernels, quantization experiments, speculative decoding, multi-GPU parallelism, fine-tuning, distillation</li><li>Goal: trade engineering time for efficiency at scale.</li></ul>
+<p class="rv">And the model-choice pre-flight checklist, which you should run before falling in love with any checkpoint:</p>
+<ul class="rv"><li><strong>Task fit</strong> — chat, coding, documents, agents, multimodal, edge, fine-tuning?</li><li><strong>Memory fit</strong> — weights + KV + overhead + margin ≤ 80–90% of available?</li><li><strong>Interface fit</strong> — tokenizer, template, stop tokens, tool schema, reasoning mode?</li><li><strong>Runtime fit</strong> — does your engine actually support this architecture + quant + context + serving mode?</li><li><strong>License fit</strong> — can you legally use this for the thing you're building?</li></ul>
+<p class="rv">When you're comparing candidates, run the same 20–50 prompts through each. Real tasks. Coding edits. Document Q&amp;A. JSON output. Summaries. Tool calls. Long context. Measure quality, latency, memory, template reliability, failure modes. Your workload is the benchmark.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch22.html"><span class="dir">&#8592; Previous — Chapter 22</span><span class="t">Failure Modes and Fixes</span></a>
+<a class="pn next" href="epilogue.html"><span class="dir">Next — Epilogue &#8594;</span><span class="t">The Default Is Now Local</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

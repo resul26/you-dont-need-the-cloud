@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>You're Renting a Fortune, One Token at a Time — You Don't Need The Cloud</title>
+<meta name="description" content="Introduction — You're Renting a Fortune, One Token at a Time">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Introduction</div>
+<h1 class="chapter-title rv rv-d1">You're Renting a Fortune, One Token at a Time</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Let me tell you what's happening right now, okay? Every month, you're paying some cloud company to let you borrow their computer. And it's not even a <em>good</em> computer arrangement. It's like renting a car by the mile at an airport, forever, except the car is also judging your prompts and occasionally refusing to finish your sentence because of "safety policies."</p>
+<p class="rv">Here's the part that should make you furious: while you've been doing that, the open-source world quietly built models that are <em>ridiculously</em> good. They're sitting on Hugging Face right now. Free weights. And a $1,500 box in your closet can run them.</p>
+<p class="rv">Now — I'm not saying throw your API key in the ocean tonight. There are legitimate reasons to use hosted models, and we'll get to those, because part of being an adult is knowing when to rent. But the <em>default assumption</em> — that you need a data center to use serious AI — is dead. It's a 2023 take. Let it go.</p>
+<p class="rv">Here's the thesis, and it's the one thing you should tattoo somewhere:</p>
+<blockquote class="rv"><p><strong>In 2026, local AI is a complete stack — hardware, inference engine, open-weight models — mature enough that a single workstation can replace a pile of cloud APIs for most everyday workloads.</strong></p></blockquote>
+<p class="rv">That one line has three moving parts: the hardware, the software that runs on it, and the models themselves. This book walks you through all three the way a cranky older brother would — with the math first, the drama second, and the marketing nonsense officially banned from the premises.</p>
+<p class="rv">There are only two underlying ideas you need to survive this whole thing. Write them on your hand:</p>
+<p class="rv"><strong>Idea #1: Everything is a math problem, and the math is simple.</strong> VRAM fits, bandwidth moves, context costs. That's it. Once you see the formulas, every confident Reddit thread dissolves into people who did the math and people who didn't.</p>
+<p class="rv"><strong>Idea #2: "It runs" is not "it serves."</strong> A demo is a model loading once and answering one question. A system is a box that answers the twentieth concurrent question on a Tuesday afternoon without falling over. This book is about building systems, not demos.</p>
+<p class="rv">Let's start with what the hell these machines are actually doing, because you cannot size hardware for something you don't understand, and most people don't understand it — they just know the vibes.</p>
+</article>
+</main>
+<nav class="prev-next">
+<span></span>
+<a class="pn next" href="ch01.html"><span class="dir">Next — Chapter 1 &#8594;</span><span class="t">What the Hell Is These Things Actually Doing?</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

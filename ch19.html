@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG vs. Giant Prompts — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 19 — RAG vs. Giant Prompts">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 19</div>
+<h1 class="chapter-title rv rv-d1">RAG vs. Giant Prompts</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">RAG (Retrieval-Augmented Generation) means retrieve the relevant chunks, give the model only those. Simple idea. Hard implementation.</p>
+<p class="rv">The pipeline has a dozen stages, each a failure point:</p>
+<ul class="rv"><li>Ingestion — getting the documents in</li><li>Parsing — PDFs are a war crime against machines</li><li>Chunking — splitting into usable sizes</li><li>Embeddings — converting chunks into vectors</li><li>Vector index — the database</li><li>Retrieval — top-k lookup</li><li>Reranking — re-ordering retrieved candidates</li><li>Prompt construction</li><li>Answer generation</li><li>Grounding checks</li><li>Evaluation</li></ul>
+<p class="rv"><strong>The hard truth:</strong> most bad RAG systems aren't bad because of the LLM. They're bad because of <em>chunking, retrieval, reranking, and evaluation</em>.</p>
+<p class="rv"><strong>Chunking is the silent killer.</strong> Fixed-size chunks with no overlap split sentences mid-thought and lose context. Semantic chunking, or hierarchical chunking with parent-document retrieval, works better — but there's no universal answer. You have to evaluate chunk size, overlap, and splitting strategy on <strong>your actual documents</strong>.</p>
+<p class="rv"><strong>A good reranker rescues mediocre retrieval.</strong> No reranker fixes chunks that lost the answer during ingestion. So:</p>
+<blockquote class="rv"><p><strong>Long context is a complement to RAG, not a replacement.</strong></p></blockquote>
+<p class="rv">Use RAG for large corpora. Use long context for the final selected evidence. A 1M-token context window isn't a knowledge base; it's a bracket. Stuffing a whole codebase into the prompt doesn't work reliably, and even when it fits, retrieve-first is almost always better.</p>
+<p class="rv">Practical habits that help:</p>
+<ul class="rv"><li>Put critical instructions near the beginning AND the end of your prompt.</li><li>Use section headers and delimiters.</li><li>Ask for citations tied to source chunks.</li><li>Compress conversational history.</li><li>Use summary memory instead of infinite chat history.</li></ul>
+
+<div class="diagram" id="diag-rag" data-autoplay>
+  <div class="d-head">
+    <span class="d-title">Fig 3 — The RAG pipeline: 11 stages, 11 failure points</span>
+    <span class="d-ctrl">
+      <button class="d-btn" id="rag-prev">◀ Prev</button>
+      <button class="d-btn" id="rag-next">Next ▶</button>
+    </span>
+  </div>
+  <svg viewBox="0 0 820 190" role="img" aria-label="RAG pipeline flow">
+    <g id="rag-nodes"></g>
+    <g id="rag-edges"></g>
+  </svg>
+  <div class="d-foot" id="rag-note" style="min-height:52px">Step through the pipeline. Every stage is a place your RAG can quietly die.</div>
+</div>
+<script>
+(function () {
+  var STAGES = [
+    ["Ingest", "PDFs are a war crime against machines. If parsing turns tables into garbage, nothing downstream can save you."],
+    ["Chunk", "The silent killer. Fixed-size chunks with no overlap split sentences mid-thought. Semantic or hierarchical usually wins — evaluate on YOUR docs."],
+    ["Embed", "Cheap embeddings make expensive rerankers necessary. Match the embedding model to the corpus language and domain."],
+    ["Index", "The vector DB. Rarely the bottleneck, often the scapegoat."],
+    ["Retrieve", "Top-k wrong = the evidence never arrives. A good model cannot answer from evidence it never received."],
+    ["Rerank", "A good reranker rescues mediocre retrieval. No reranker fixes chunks that lost the answer during ingestion."],
+    ["Prompt", "Stuffing the turkey doesn’t work. Give the model the selected evidence, not the whole farm."],
+    ["Answer", "Grounded or confabulated — the model only knows what the pipeline handed it."],
+    ["Critique", "Grounding checks: does the answer cite the retrieved chunk? Faithfulness is measurable."],
+    ["Evaluate", "Keep 30–100 real questions with expected answers. RAG without evals is hope with a vector store."],
+    ["Ship", "Then instrument it. Bad retrieval looks exactly like a bad model to your users."]
+  ];
+  var svgNS = "http://www.w3.org/2000/svg";
+  var nodes = document.getElementById("rag-nodes"), edges = document.getElementById("rag-edges");
+  var note = document.getElementById("rag-note");
+  var boxes = [];
+  function el(tag, attrs) { var e = document.createElementNS(svgNS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  var perRow = 6, bw = 116, bh = 44, gx = 20, gy = 66;
+  STAGES.forEach(function (s, i) {
+    var row = i < perRow ? 0 : 1, col = i % perRow;
+    var x = 20 + col * (bw + gx), y = 26 + row * gy;
+    // reverse row direction for second row (snake)
+    if (row === 1) x = 20 + (perRow - 1 - col) * (bw + gx);
+    var g = el("g", { opacity: 1, "class": "rag-stage" });
+    var r = el("rect", { x: x, y: y, width: bw, height: bh, "class": "nd" });
+    var t = el("text", { x: x + bw / 2, y: y + bh / 2 + 4, "text-anchor": "middle", "class": "lbl" });
+    t.textContent = s[0];
+    g.appendChild(r); g.appendChild(t);
+    nodes.appendChild(g);
+    boxes.push({ g: g, r: r, x: x, y: y });
+  });
+  // snake edges
+  for (var i = 0; i < boxes.length - 1; i++) {
+    var a = boxes[i], b = boxes[i + 1];
+    var p;
+    if (a.y === b.y) {
+      var dir = a.y === 26 ? 1 : -1;
+      p = el("path", { d: "M " + (a.x + (dir > 0 ? bw : 0)) + " " + (a.y + bh / 2) + " L " + (b.x + (dir > 0 ? 0 : bw)) + " " + (b.y + bh / 2), "class": "edge" });
+    } else {
+      p = el("path", { d: "M " + (a.x + bw / 2) + " " + (a.y + bh) + " C " + (a.x + bw / 2) + " " + (a.y + bh + 40) + " " + (b.x + bw / 2) + " " + (b.y - 40) + " " + (b.x + bw / 2) + " " + b.y, "class": "edge" });
+    }
+    edges.appendChild(p);
+    var L = p.getTotalLength(); p.dataset.len = L;
+  }
+  edges.childNodes.forEach(function (p) {
+    p.style.strokeDasharray = p.dataset.len; p.style.strokeDashoffset = p.dataset.len;
+  });
+  var active = -1;
+  function setActive(i) {
+    active = Math.max(-1, Math.min(STAGES.length - 1, i));
+    boxes.forEach(function (b, k) {
+      b.r.setAttribute("class", k === active ? "nd-hot" : "nd");
+      b.g.childNodes[1].setAttribute("fill", k === active ? "#fff" : "");
+    });
+    note.textContent = active >= 0 ? "Stage " + (active + 1) + "/11 — " + STAGES[active][0] + ": " + STAGES[active][1] : "Step through the pipeline. Every stage is a place your RAG can quietly die.";
+  }
+  document.getElementById("rag-next").addEventListener("click", function () { setActive(active + 1); });
+  document.getElementById("rag-prev").addEventListener("click", function () { setActive(active - 1); });
+  registerDiagram("diag-rag", function (tl, host) {
+    // default-visible: boxes render fully without JS. Timeline re-introduces them.
+    tl.set(boxes.map(b => b.g), { opacity: 0, y: 10 }, 0);
+    boxes.forEach(function (b, i) {
+      tl.to(b.g, { opacity: 1, y: 0, duration: .3 }, i * 0.14);
+      if (i < STAGES.length - 1) tl.to(edges.childNodes[i], { strokeDashoffset: 0, duration: .25 }, i * 0.14 + 0.1);
+    });
+    tl.to({}, { duration: .6 });
+  });
+})();
+</script>
+
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch18.html"><span class="dir">&#8592; Previous — Chapter 18</span><span class="t">Chat Templates (Or: Why Your Model Sounds Drunk)</span></a>
+<a class="pn next" href="ch20.html"><span class="dir">Next — Chapter 20 &#8594;</span><span class="t">Agents with Guardrails</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

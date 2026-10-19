@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quantization — Quality Loss You Can Choose on Purpose — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 17 — Quantization — Quality Loss You Can Choose on Purpose">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 17</div>
+<h1 class="chapter-title rv rv-d1">Quantization — Quality Loss You Can Choose on Purpose</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Quantization is the art of trading bits for memory (and sometimes speed). The 2026 cheat sheet:</p>
+<ul class="rv"><li><strong>FP16 / BF16</strong> — the baseline for evaluations. Best quality when you can afford it.</li><li><strong>Q8 / INT8</strong> — near-lossless on a lot of tasks. Big, but useful.</li><li><strong>Q6 / Q5</strong> — strong middle ground. Good quality, moderate memory savings.</li><li><strong>Q4</strong> — the default consumer sweet spot for chat and document workflows.</li><li><strong>Q3 / Q2</strong> — for when you must fit a bigger model. Math, code, structured output, and tool use degrade first.</li></ul>
+<p class="rv">Weight quantization and KV cache quantization are different things:</p>
+<ul class="rv"><li><strong>Weight quant</strong> shrinks the model. You can quantize pretty aggressively with decent quality, especially at the larger sizes.</li><li><strong>KV cache quant</strong> shrinks the live context. FP16/BF16 is the clean baseline. FP8/INT8 KV cache is a practical 2026 floor. <strong>Sub-8-bit KV cache is research-heavy, workload-sensitive, and should be tested before you trust it.</strong></li></ul>
+<p class="rv">Where quantization failure shows up first, in roughly this order:</p>
+<ul class="rv"><li>Math and multi-step reasoning</li><li>Code correctness</li><li>JSON / schema adherence and tool-call reliability</li><li>Subtle instruction following</li><li>Long-context retrieval</li></ul>
+<p class="rv">And the single best rule in here: <strong>a smaller model at higher precision can beat a bigger model crushed into too few bits.</strong> A 7B at Q6 often beats a 13B at Q2 on real reasoning tasks while using less memory and running faster. Don't worship parameter count. That's a leaderboard habit, not an engineering habit.</p>
+
+<div class="widget" id="w-quant">
+  <div class="w-head">Pick your poison — every quant trades memory for quality. Watch the trade.</div>
+  <div class="w-body">
+    <div class="slider-row"><label>Model</label>
+      <div class="seg" id="q-model"><button data-v="7">7B</button><button data-v="13" class="on">13B</button><button data-v="70">70B</button></div>
+    </div>
+    <div id="q-rows"></div>
+    <p class="readout-sub" style="margin-top:14px">Quality bars are honest but illustrative — the real answer depends on your task. What’s a fact is the order: FP16 ≥ Q8 ≥ Q6 ≥ Q5 ≥ Q4 ≥ Q3 > Q2, and that math/code/JSON degrade first. The other fact is the orange line: <b>Q4 is the default consumer sweet spot</b>, and a smaller model at Q6 often beats a bigger one at Q2.</p>
+  </div>
+</div>
+<script>
+(function () {
+  var QUANTS = [
+    ["FP16/BF16", 2.0, 100], ["Q8/INT8", 1.0, 99], ["Q6_K", .82, 98], ["Q5_K", .69, 96],
+    ["Q4_K", .56, 92], ["Q3_K", .43, 80], ["Q2_K", .33, 62]
+  ];
+  var size = 13;
+  var host = document.getElementById("q-rows");
+  document.getElementById("q-model").addEventListener("click", function (e) {
+    if (e.target.tagName !== "BUTTON") return;
+    document.querySelectorAll("#q-model button").forEach(function (b) { b.classList.remove("on"); });
+    e.target.classList.add("on"); size = parseInt(e.target.getAttribute("data-v"), 10); render();
+  });
+  function render() {
+    host.innerHTML = "";
+    var fp16 = size * 2;
+    QUANTS.forEach(function (q) {
+      var gb = size * q[1];
+      var hot = q[0] === "Q4_K";
+      var row = document.createElement("div");
+      row.style.cssText = "display:grid; grid-template-columns: 92px 1.6fr 64px 1fr 44px; gap:12px; align-items:center; margin:7px 0;" + (hot ? "background:var(--accent-soft); padding:6px 8px; margin-left:-8px; margin-right:-8px" : "");
+      row.innerHTML =
+        '<div style="font:600 12.5px var(--font-mono); color:' + (hot ? "var(--accent)" : "var(--ink)") + '">' + q[0] + '</div>' +
+        '<div style="height:16px; background:rgba(255,255,255,.04)"><div style="height:100%; width:' + (gb / fp16 * 100).toFixed(1) + '%; background:linear-gradient(90deg,#7c2d12,var(--accent))"></div></div>' +
+        '<div style="font:500 12.5px var(--font-mono); color:var(--ink-dim)">' + gb.toFixed(1) + ' GB</div>' +
+        '<div style="height:16px; background:rgba(255,255,255,.04)"><div style="height:100%; width:' + q[2] + '%; background:linear-gradient(90deg,#3f7d45,#6fc276)"></div></div>' +
+        '<div style="font:500 12.5px var(--font-mono); color:var(--ink-dim); text-align:right">' + q[2] + '</div>';
+      host.appendChild(row);
+    });
+    var legend = document.createElement("div");
+    legend.style.cssText = "display:flex; gap:26px; font:500 11.5px var(--font-mono); color:var(--ink-mute); margin-top:12px";
+    legend.innerHTML = '<span><span style="display:inline-block;width:11px;height:11px;background:var(--accent);margin-right:6px"></span>memory (' + size + 'B model)</span>' +
+      '<span><span style="display:inline-block;width:11px;height:11px;background:#6fc276;margin-right:6px"></span>relative quality on your real tasks</span>';
+    host.appendChild(legend);
+  }
+  render();
+})();
+</script>
+
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch16.html"><span class="dir">&#8592; Previous — Chapter 16</span><span class="t">The 2026 Model Scene — an Ecosystem, Not a Horse Race</span></a>
+<a class="pn next" href="ch18.html"><span class="dir">Next — Chapter 18 &#8594;</span><span class="t">Chat Templates (Or: Why Your Model Sounds Drunk)</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>

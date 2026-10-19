@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Failure Modes and Fixes — You Don't Need The Cloud</title>
+<meta name="description" content="Chapter 22 — Failure Modes and Fixes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='10' height='10' x='3' y='3' fill='%23F05A28'/%3E%3C/svg%3E">
+<script>document.documentElement.className+=" js";window.__dq=[];window.__jserrs=[];window.addEventListener("error",function(e){window.__jserrs.push(String((e&&e.message)||e));var d=document.getElementById("jserr-dump");if(!d){d=document.createElement("div");d.id="jserr-dump";d.style.display="none";document.body.appendChild(d);}d.textContent=window.__jserrs.join(" ||| ");});window.registerDiagram=function(id,fn){window.__dq.push({id:id,fn:fn});};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>if (window.gsap && window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);</script>
+<script src="site.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>You Don't Need The Cloud <span class="dim">/ interactive book</span></a>
+    <nav class="top-nav">
+      <a href="index.html">Cover</a>
+      <a href="index.html#contents">Contents</a>
+      <a href="sources.html">Sources</a>
+      <a href="https://x.com/TheAhmadOsman" target="_blank" rel="noopener">@TheAhmadOsman&#8599;</a>
+    </nav>
+  </div>
+  <div class="read-progress"></div>
+</header>
+<main>
+
+<div class="kicker rv">Chapter 22</div>
+<h1 class="chapter-title rv rv-d1">Failure Modes and Fixes</h1>
+<div class="chapter-rule rv rv-d2"></div>
+<article>
+<p class="rv">Local LLM failures are rarely mysterious. They're almost always one of: <strong>memory fit, formatting, runtime support, decoding settings, or retrieval quality.</strong> Bookmark this chapter.</p>
+<div class="rv" style="overflow-x:auto"><table><thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead><tbody><tr><td><strong>Out of memory</strong></td><td>Weights + KV + overhead &gt; available</td><td>Smaller model, less context, lower concurrency, better quant, more headroom</td></tr><tr><td><strong>Gibberish or role confusion</strong></td><td>Wrong chat template, wrong tokenizer, wrong BOS/EOS</td><td>Check model card, verify runtime template before blaming the model</td></tr><tr><td><strong>Slow first token</strong></td><td>Prefill is expensive</td><td>Shorter prompt, prefix caching, better retrieval, less context, faster runtime</td></tr><tr><td><strong>Slow streaming</strong></td><td>Decode bottleneck</td><td>More bandwidth, different quant, no CPU spill, attention backend, speculative decoding, model is too big</td></tr><tr><td><strong>Bad document answers</strong></td><td>Retrieval failure</td><td>Inspect parsed text, chunk boundaries, metadata, top-k, reranking</td></tr><tr><td><strong>Bad JSON / tool calls</strong></td><td>Decoding or schema</td><td>Lower temp, constrained decoding, stricter schemas, better examples, tool-tuned model</td></tr><tr><td><strong>Repeating loops</strong></td><td>Decoding or template</td><td>Reduce temp / top-p, add repetition penalties, check stop tokens, verify template</td></tr></tbody></table></div>
+<p class="rv">Boring checks first. They fix more problems than flag-day model swaps.</p>
+</article>
+</main>
+<nav class="prev-next">
+<a class="pn" href="ch21.html"><span class="dir">&#8592; Previous — Chapter 21</span><span class="t">Privacy Is Not Free</span></a>
+<a class="pn next" href="ch23.html"><span class="dir">Next — Chapter 23 &#8594;</span><span class="t">How to Grow Your Stack</span></a>
+</nav>
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>You Don't Need The Cloud</strong> — an interactive retelling of Ahmad Osman's free
+    <em>Local LLMs From Zero to Hero</em> article series (April–May 2026). Built by hand with semantic SVG + GSAP 3
+    in the spirit of the <a href="https://github.com/omkamal/animated-diagrams-skill" target="_blank" rel="noopener">omkamal/animated-diagrams-skill</a> pipeline. Hosted on GitHub Pages. No cloud models were consulted in the making of this site.</p>
+  </div>
+</footer>
+</body>
+</html>
