@@ -286,13 +286,19 @@ input[type=range]::-moz-range-thumb { width: 16px; height: 16px; background: var
 .site-footer a { color: var(--ink-dim); }
 
 /* ---------- Reveal animations ---------- */
-/* reveal starts hidden only when JS is present (no-js / headless safety) */
-html.js .rv { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
-html.js .rv.in { opacity: 1; transform: none; }
-.rv-d1 { transition-delay: .08s; } .rv-d2 { transition-delay: .16s; } .rv-d3 { transition-delay: .24s; }
+/* reveal: content visible by default. JS animates a gentle rise on first paint.
+   No opacity-0 defaults — content must never be gated on JS executing. */
+html.js .rv { animation: rv-rise .7s ease backwards; }
+html.js .rv-d1 { animation-delay: .08s; }
+html.js .rv-d2 { animation-delay: .16s; }
+html.js .rv-d3 { animation-delay: .26s; }
+@keyframes rv-rise {
+  from { opacity: .0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  html.js .rv { opacity: 1; transform: none; transition: none; }
+  html.js .rv { animation: none; }
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto; }
 }
 
